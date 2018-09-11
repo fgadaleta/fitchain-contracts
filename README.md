@@ -70,10 +70,12 @@ Compiling ./contracts/fitchainRegistry.sol...
 ## Contract: fitchainRegistry
 ### Events
 
-* ```EntityCreated(address owner,
+* ```
+    EntityCreated(address owner,
     bytes32 entityType,
     bytes32 entityId,
-    bytes32 ipfs) ```
+    bytes32 ipfs)
+    ```
 
 * ```EntityArchived(address owner, bytes32 entityType, bytes32 entityId);```
 
