@@ -9,11 +9,13 @@ The smart contracts part of the fitchain platform are
 
 ## Testing
 
-1. Start testrpc (or ganache-cli
+1. Start testrpc (or ganache-cli)
+
 ``` $ ganache-cli ```
 
 
-2. Set sender address in `truffle.js` with one account created in `ganache`
+2. Set sender address in ```truffle.js``` with one account created in ```ganache```
+
 
 ```javascript
 module.exports = {
@@ -562,7 +564,7 @@ Delete model with `model_id` from registry.
 * **Error Response:**
 
   * **ErrorCode:** 2 CHALLENGE NOT FOUND
-  
+
     **Content:** `{ error : "Challenge doesn't exist" }`
 
   * **ErrorCode:** 3 NOT AUTHORIZED
