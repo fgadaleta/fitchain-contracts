@@ -1,10 +1,10 @@
 # What is this
 
-This is the fitchain registry on ethereum.
-The smart contracts part of the fitchain platform are
+This is the fitchain registry and Validator Pool Contract (VPC) for the Ethereum blockchain.
+The two contracts hereby implemented are 
 
-- fitchainRegistrar: registry of actors (data owner, data scientist, validator)
-- fitchainRegistry:  registry of models and model challenges
+- `vpc.sol`: registry of actors (data owner, data scientist, validator) and validation channels
+- `registry.sol`:  registry of models and model challenges
 
 
 ## Testing
@@ -35,21 +35,21 @@ module.exports = {
 
 ` $ truffle test `
 
-This should return
+This should return something like 
 
 ```
 Using network 'development'.
 
 Compiling ./contracts/fitchainLib.sol...
-Compiling ./contracts/fitchainRegistrar.sol...
-Compiling ./contracts/fitchainRegistry.sol...
+Compiling ./contracts/vpc.sol...
+Compiling ./contracts/registry.sol...
 
-  Contract: fitchainRegistrar
+  Contract: vpc
     ✓ adding registrant to the registrar (402ms)
     ✓ deactivate registrant (84ms)
     ✓ check if registrant is active
 
-  Contract: fitchainRegistry
+  Contract: registry
     ✓ adding models to the registry  (180ms)
     ✓ setting model as valid/invalid
     ✓ getting models from the registry  (39ms)
@@ -67,7 +67,8 @@ Compiling ./contracts/fitchainRegistry.sol...
 
 ## Contract usage documentation
 
-## Contract: fitchainRegistry
+
+## Contract: registry
 ### Events
 
 * ```
@@ -100,7 +101,7 @@ Create model without duplicates
 
 * **Method:**
 
-  fitchainRegistry:createModel
+  registry:createModel
 
 *  **Params**
 
@@ -149,7 +150,7 @@ Created(ipfs_address, msg.sender);
 
 * **Method:**
 
-  fitchainRegistry:createChallenge
+  registry:createChallenge
 
 *  **Params**
 
@@ -192,7 +193,7 @@ Returns the number of unique models in the registry.
 
 * **Method:**
 
-    fitchainRegistry:getNumberOfModels
+    registry:getNumberOfModels
 
 *  **Params**
 
@@ -216,7 +217,7 @@ Returns the number of unique models in the registry.
 
 * **Method:**
 
-      fitchainRegistry:getNumberOfChallenges
+      registry:getNumberOfChallenges
 
 *  **Params**
 
@@ -255,7 +256,7 @@ Get all fields of model with `model_id`.
 
 * **Method:**
 
-    fitchainRegistry:getModel
+    registry:getModel
 
 *  **Params**
 
@@ -305,7 +306,7 @@ Get all fields of challenge with `challenge_hash`.
 
 * **Method:**
 
-    fitchainRegistry:getChallenge
+    registry:getChallenge
 
 *  **Params**
 
@@ -352,7 +353,7 @@ Get all fields of challenge with `challenge_hash`.
 
   * **Method:**
 
-    fitchainRegistry:getModelChallenges
+    registry:getModelChallenges
 
   *  **Params**
 
@@ -389,8 +390,6 @@ Get all fields of challenge with `challenge_hash`.
 
 
 
-
-
 **Delete model**
   ----
 Delete model with `model_id` from registry.
@@ -400,7 +399,7 @@ Delete model with `model_id` from registry.
 
 * **Method:**
 
-      fitchainRegistry:deleteModel
+      registry:deleteModel
 
 *  **Params**
 
@@ -448,7 +447,7 @@ Delete model with `model_id` from registry.
 
 * **Method:**
 
-    fitchainRegistry:deleteChallenge
+    registry:deleteChallenge
 
 *  **Params**
 
@@ -495,7 +494,7 @@ Delete model with `model_id` from registry.
     Set the validity flag for model with `model_id`
 * **Method:**
 
-      fitchainRegistry:setModelValid
+      registry:setModelValid
 
 *  **Params**
 
@@ -543,7 +542,7 @@ Delete model with `model_id` from registry.
   Set challenge with `challenge_id` as active/inactive
 
 * **Method:**
-        fitchainRegistry:setChallengeValid
+        registry:setChallengeValid
 
 *  **Params**
 
