@@ -1,40 +1,20 @@
-/*
-Registrar — whitelisting contract, stores all Registrants which are allowed to add new
-            Models to the registry
-Registry  — registry itself, stores identities and information about all Models added
-
-This contract implements the registrar identity.
-A registrar can be the owner of the thing or one of its verifiers
-*/
-
 pragma solidity ^0.4.23;
 import "./fitchainLib.sol";
+// import "./Dictionary.sol";
 
 contract Vpc {
-  uint MIN_STAKE      = 12000000000000000000;   // min stake in wei (12 eth)
-  uint VERIFIER_QUOTA = 1000;
-  address public registrar;                     // address of account who inits
+  uint MIN_STAKE         = 12000000000000000000;   // min stake in wei (12 eth)
+  uint VERIFIER_QUOTA    = 1000;
+  uint MIN_NUM_VERIFIERS = 1;  // FIXME change_me
+  address public registrar;                        // address of account who inits
 
-  /**
-   * Created event, gets triggered when a new registrant gets created
-   * event
-   * @param registrant - The registrant address (eg. prover)
-   * param registrar - The registrar address (eg. model id)
-   * @param stake     - The deposit of this registrant
-   */
-  //event Created(address indexed registrant, address registrar, bytes data, uint stake);
+  // using Dictionary for Dictionary.Data;
+
   event Created(address registrant, uint stake);
-
-  /**
-   * Updated event, gets triggered when a new registrant id Updated
-   * event
-   * @param registrant - The registrant address.
-   * @param registrar - The registrar address.
-   * param data - The data of the registrant.
-   */
-  //event Updated(address indexed registrant, address registrar, bytes data, bool active);
   event Updated(address indexed registrant, address registrar, bool active);
   event Withdrawn(address addr);
+  event InitChannel(bytes32 channel_id);
+
   /**
    * Error event.
    * event
@@ -47,7 +27,6 @@ contract Vpc {
    * 6: Proof already submitted
    */
   event Error(uint code);
-  event InitChannel(bytes32 channel_id);
 
   // Registrant -> Validator
   struct Registrant {
@@ -79,20 +58,18 @@ contract Vpc {
   }
 
   struct Pot {
-    // bytes32 model_id;    // identity of the model this proof is for
     bytes32[] proofsList;   // list of proofs'keys we can look up (sumbitted by verifiers)
     mapping(bytes32 => Proof) proofStructs;
     mapping(bytes32 => bool) proofsSubmitted;
+    mapping(bytes32 => uint) merkle_counters;
   }
 
   mapping(bytes32 => Pot) potStructs;  // random access by model_id to proof of training
-
   // Pot[] pots; // not used
   // mapping(bytes32 => bytes32[]) pots;  // model_id to merkle_roots
 
-
   /**
-   * Function can't have ether modifier
+   * no ether accepted for this tx
    */
   modifier noEther() {
     if (msg.value > 0) revert();
@@ -143,6 +120,9 @@ contract Vpc {
       potStructs[model_id].proofsList.push(prf_key);
       potStructs[model_id].proofStructs[prf_key] = prf;
       potStructs[model_id].proofsSubmitted[prf_key] = true;
+      // update merkle counter for this pot
+      uint count = potStructs[model_id].merkle_counters[merkle_root];
+      potStructs[model_id].merkle_counters[merkle_root] = count+1;
 
       // TODO
       // check number of current submissions
@@ -163,24 +143,52 @@ contract Vpc {
   }
 
   // given proof_key return the proof fields
+  // TODO make this internal
   function getProof(bytes32 model_id, bytes32 proof_key) public constant returns(address, bytes32, bytes32[]) {
     require(isChannel(model_id));
     Proof memory proof = potStructs[model_id].proofStructs[proof_key];
     return (proof.sender, proof.merkle_root, proof.sigs);
+    }
+
+  // !!WORK IN PROGRESS!! given model_id returns bool if model is verified by consensus (valid Pot)
+  function isPotValid(bytes32 model_id) public constant returns(bool, uint) {
+    // get channel from model_id
+    // get channel.verifiers and channel.k
+    // get pot from pot.model_id
+    // check that +k sigs in pot.proofs
+    var (m_id, k) = getChannel(model_id);
+
+    // TODO count number of equal merkle roots reached super-majority
+    bytes32[] memory proof_keys = getProofsList(model_id);
+
+    for(uint i=0; i<proof_keys.length; i++){
+      var (prf_sender, prf_merkleroot, prf_sigs) = getProof(model_id, proof_keys[i]);
+        // TODO check sender is in verifiers of this channel
+
+        // TODO check that sigs belong to verifiers of this channel
+
+        // count how many verifiers proposed this merkle root
+        uint count = potStructs[model_id].merkle_counters[prf_merkleroot];
+        // FIXME super-majority 51% is enough
+        if(count > k-1) {
+          return (true, count);
+        }
+    }
+    return (false, 0);
   }
 
-  // TBI given model_id returns bool if model is verified by consensus (valid Pot)
-  function isPotValid(bytes32 model_id) public constant returns(bool) {
-    // TODO count number of equal merkle roots reached super-majority
-    return true;
-  }
+  function getValidationInfo(bytes32 model_id, bytes32 merkle_root) public constant returns(uint) {
+    return potStructs[model_id].merkle_counters[merkle_root];
+    }
 
   function isChannel(bytes32 check) public view returns(bool isIndeed) {
    return isChannelActive[check];
     }
 
-  function init_channel(bytes32 model_id, uint k) returns (bool success) {
+  function initChannel(bytes32 model_id, uint k) returns (bool success) {
     require(!isChannel(model_id));
+    require(k > MIN_NUM_VERIFIERS);
+
     bytes32 channel_id = model_id;
 
     channelList.push(channel_id);
@@ -193,6 +201,7 @@ contract Vpc {
 
     // allocate proof of training for the model in this channel
     potStructs[model_id].proofsList = new bytes32[](0x0);
+
     //pots[model_id] = new bytes32[](0x0);
 
     // nominate verifiers for this channel
@@ -206,51 +215,20 @@ contract Vpc {
     return true;
     }
 
-
   function getChannel(bytes32 channel_id) public view returns(bytes32, uint) {
       require(isChannel(channel_id));
       return (channelStructs[channel_id].model_id, channelStructs[channel_id].k);
-  }
+    }
 
   function getVerifiers(bytes32 channel_id) public constant returns (address[]) {
     require(isChannel(channel_id));
     return channelVerifiers[channel_id];
-
-    /*
-    uint index = idToChannel[channel_id];
-    if (index == 0) {
-        emit Error(2);
-        return;
     }
-    */
-
-    //address[] memory verifiers = channelVerifiers[channel_id];
-    //for(uint i=0; i<verifiers.length; i++){
-    //    v.push(verifiers[i]);
-    //  }
-    // return v;
-    //return new address[](0x0);
-  }
-
 
   function getNumberOfChannels() public constant returns (uint count) {
     return channelList.length;
-  }
+    }
 
-
-  function __is_valid(bytes model_id) constant returns (bool) {
-    // get channel from model_id
-    // get channel.verifiers and channel.k
-    // get pot from pot.model_id
-    // check that +k sigs in pot.proofs
-
-    return false;
-  }
-
-
-  /**
-   * Add a registrant and set stake with value
-   */
   function deposit() payable public returns (bool) {
 	  // check max number of verifiers (refund if fails)
 	  require(registrants.length < VERIFIER_QUOTA);
@@ -269,12 +247,11 @@ contract Vpc {
 		  registrants[pos] = Registrant(msg.sender, msg.value, active);
 		  // Update position in mapping
 		  registrantIndex[msg.sender] = pos;
-	  }
-
+	   }
 	  // Notify blockchain
 	  emit Created(msg.sender, msg.value);
 	  return true;
-  }
+    }
 
   // TBI
   function withdraw() payable public returns (bool) {
@@ -289,31 +266,11 @@ contract Vpc {
     }
 
     /**
-    * Edit a registrant, only registrar allowed
-    * public_function
-    * @param _registrant - The registrant address.
-    * @param _data - The registrant data string.
-    */
-    /*
-    function edit(address _registrant, bytes _data, bool _active) public isRegistrar noEther returns (bool) {
-      if (registrantIndex[_registrant] == 0) {
-	Error(3); // No such registrant
-	return false;
-      }
-
-      Registrant storage registrant = registrants[registrantIndex[_registrant]];
-      registrant.data = _data;
-      registrant.active = _active;
-      Updated(_registrant, msg.sender, _data, _active);
-      return true;
-    }
-    */
-
-    /**
     * Set new registrar address, only registrar allowed
     * public_function
     * @param _registrar - The new registrar address.
     */
+
   function setNextRegistrar(address _registrar) public isRegistrar noEther returns (bool) {
       registrar = _registrar;
       return true;
@@ -365,6 +322,7 @@ contract Vpc {
     * Get all the active registrants' addresses
 	  * constant_function
     */
+
   function getRegistrants() public constant returns (address[]) {
         address[] memory result = new address[](registrants.length-1);
         for (uint j = 1; j < registrants.length; j++) {
@@ -385,6 +343,7 @@ contract Vpc {
 	  /**
     * Returns number of active registrants in the registrar
     */
+
   function getNumberRegistrants() public constant returns (uint) {
 		    uint total = 0;
 		    for(uint j=1;j<registrants.length;j++){
@@ -399,6 +358,7 @@ contract Vpc {
     * Function to reject value sends to the contract.
     * fallback_function
     */
+
   function () noEther public  {}
 
     /**
@@ -416,6 +376,7 @@ contract Vpc {
 
     /* check if pool contains element */
     // FIXME convert this to a mapping (much more efficient)
+
   function contains(uint[] pool, uint element) pure returns(bool) {
         for(uint i=0; i<pool.length; i++){
             if(element == pool[i]){

@@ -530,7 +530,7 @@ contract Registry {
     * @param _id - The model to change.
     * @param _isValid - The new validity flag of the model.
     */
-    function setModelValid(bytes32 model_id, bool is_valid) public isRegistrant noEther returns(bool) {
+    function setModelValid(bytes32 model_id, bool is_valid) public isRegistrant noEther constant returns(bool) {
         uint index = idToModel[model_id];
 
 	    // not found
