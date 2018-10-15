@@ -1,4 +1,4 @@
-var registry = artifacts.require("./registry.sol")
+var registry = artifacts.require("Registry")
 
 module.exports = function(deployer) {
   deployer.deploy(registry);
