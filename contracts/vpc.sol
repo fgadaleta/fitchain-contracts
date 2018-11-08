@@ -48,11 +48,11 @@ contract VPC {
 
     // one channel is initialized for one model
     struct Channel {
-        bool active; // channel state
-        bytes32 channel_id;   // assigned by contract
-        bytes32 model_id;     // model to be verified in this channel
-        uint k;               // proofs in this channel require k sigs
-        address[] verifiers;  // verifiers addresses
+        bool active;            // channel state
+        uint k;                 // proofs in this channel require k sigs
+        bytes32 channelId;      // assigned by contract
+        bytes32 modelId;        // model to be verified in this channel
+        address[] verifiers;    // verifiers addresses
     }
 
     mapping(bytes32 => Channel) public channels;
@@ -60,25 +60,13 @@ contract VPC {
 
     // Data structure containing the single proof for a model
     struct Proof {
-        address sender;      // verifier who submitted this proof
-        bytes32 merkle_root; // Merkle-root of the training logs
-        bytes32[] sigs;      // list of signatures provided by verifiers
+        bool state;         // ssubmitted
+        bool verified;      // verified
+        bytes32[] merkelRoots; // Merkle-root of the training logs
+        bytes32[] sigs;     // list of signatures provided by verifiers
     }
 
-    struct Pot {
-        bytes32[] proofsList;   // list of proofs'keys we can look up (sumbitted by verifiers)
-        mapping(bytes32 => Proof) proofStructs;
-        mapping(bytes32 => bool) proofsSubmitted;
-        mapping(bytes32 => uint) merkle_counters;
-    }
-
-    mapping(bytes32 => Pot) potStructs;  // random access by model_id to proof of training
-    // Pot[] pots; // not used
-    // mapping(bytes32 => bytes32[]) pots;  // model_id to merkle_roots
-
-    /*
-     * no ether accepted for this tx
-    */
+    mapping(bytes32 => Proof) pots;
 
     modifier noEther() {
         require(msg.value > 0, 'invalid ether amount!');
@@ -99,6 +87,16 @@ contract VPC {
         require (channels[channelId].active, 'Channel Id already exists');
         _;
     }
+
+    modifier isVerifier(bytes32 channelId) {
+        bool exist = false;
+        for (uint i=0; i < channels[channelId].verifiers.length; i++){
+            if(msg.sender == channels[channelId].verifiers[i]) exist = true;
+        }
+        require(exist, 'sender not a verifier');
+        _;
+    }
+
 
     //   /**
     //   * Construct registry with and starting registrants lenght of one,
@@ -145,70 +143,50 @@ contract VPC {
     }
 
     // given model_id returns the number of submitted proofs
-    function getProofCount(bytes32 model_id) public constant returns(uint) {
-        return potStructs[model_id].proofsList.length;
-    }
+    // function getProofCount(bytes32 channelId) public constant returns(uint) {
+    //     return pots[channelId].proofsList.length;
+    // }
 
     // given the model_id return the list of proof keys
-    function getProofsList(bytes32 channelId) public isChannel(channelId) view returns(bytes32[]) {
-        return potStructs[channelId].proofsList;
-    }
-
-    // given proof_key return the proof fields
-    // TODO: make this internal
-
-    function getProof(bytes32 channelId, bytes32 proofKey) public isChannel(channelId) returns(address, bytes32, bytes32[]) {
-        Proof memory proof = potStructs[channelId].proofStructs[proofKey];
-        return (proof.sender, proof.merkle_root, proof.sigs);
-    }
+    // function getProofsList(bytes32 channelId) public isChannel(channelId) view returns(bytes32[]) {
+    //     return pots[channelId].proofsList;
+    // }
 
     // !!WORK IN PROGRESS!! given model_id returns bool if model is verified by consensus (valid Pot)
-    function isPotValid(bytes32 model_id) public constant returns(bool, uint) {
-        // get channel from model_id
-        // get channel.verifiers and channel.k
-        // get pot from pot.model_id
-        // check that +k sigs in pot.proofs
-        var (m_id, k) = getChannel(model_id);
-        // TODO count number of equal merkle roots reached super-majority
-        bytes32[] memory proof_keys = getProofsList(model_id);
-        for(uint i=0; i<proof_keys.length; i++){
-            var (prf_sender, prf_merkleroot, prf_sigs) = getProof(model_id, proof_keys[i]);
-            // TODO check sender is in verifiers of this channel
-            // TODO check that sigs belong to verifiers of this channel
+
+
+    function isPotValid(bytes32 channelId) public isVerifier(channelId) view returns(bool) {
+        for(uint i=0; i< channels[channelId].verifiers.length; i++){
             // count how many verifiers proposed this merkle root
-            uint count = potStructs[model_id].merkle_counters[prf_merkleroot];
-            // FIXME super-majority 51% is enough
-            if(count > k-1) {
-                return (true, count);
+            if(pots[channelId].verified) {
+                return true;
             }
         }
-        return (false, 0);
+        return false;
     }
 
-    function getValidationInfo(bytes32 model_id, bytes32 merkle_root) public constant returns(uint) {
-        return potStructs[model_id].merkle_counters[merkle_root];
-    }
+    // function getValidationInfo(bytes32 channelId, bytes32 merkleRoot) public view returns(uint) {
+    //     return pots[channels[channelId].proof].merkleRoots.length;
+    // }
 
 
-
-    function initChannel(bytes32 channelId, uint256 k) public isChannel(channelId) isValidInitChannelReq(channelId, k) returns (bool success) {
+    function initChannel(bytes32 channelId, uint256 k) public
+    isChannel(channelId) isValidInitChannelReq(channelId, k) returns (bool success) {
         channelList.push(channelId);
-        channels[channelId] = Channel(true, channelId, channelId, k, new address[](0));
-        // allocate proof of training for the model in this channel
-        potStructs[channelId].proofsList = new bytes32[](0x0);
-        //pots[model_id] = new bytes32[](0x0);
+        pots[channelId] = Proof(false, false, new bytes32[](0), new bytes32[](0));
+        channels[channelId] = Channel(true, k, channelId, channelId, new address[](0));
         // nominate verifiers for this channel
-        address[] memory vAddrs = getEligibleProposer(k);
-        for(uint256 i=0; i<vAddrs.length; i++) {
-            channels[channelId].verifiers.push(vAddrs[i]);
-            registrantBusy[vAddrs[i]] = true;   // this verifier is busy
+        address[] memory verifiersAddrs = getEligibleProposer(k);
+        for(uint256 i=0; i< verifiersAddrs.length; i++) {
+            channels[channelId].verifiers.push(verifiersAddrs[i]);
+            registrantBusy[verifiersAddrs[i]] = true;   // this verifier is busy
         }
         emit InitChannel(channelId);
         return true;
     }
 
     function getChannel(bytes32 channelId) public isChannel(channelId) view returns(bytes32, uint) {
-        return (channels[channelId].model_id, channels[channelId].k);
+        return (channels[channelId].modelId, channels[channelId].k);
     }
 
     function getVerifiers(bytes32 channelId) public isChannel(channelId) view returns (address[]) {
