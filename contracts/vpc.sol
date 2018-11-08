@@ -95,12 +95,15 @@ contract Vpc {
     registrants.length++;
     }
 
+  // submit_proof(service_id, model_id, merkleroot, tx_eot, sig, sender_addr)
+  // bytes32, bytes32, string, string, bytes, address
+
   // submit proof of training to model
-  function submitProof(bytes32 model_id, bytes32 merkle_root, bytes32[] sigs) returns (bool) {
+  function submitProof(bytes32 service_id, bytes32 model_id, string merkleroot, string eot,  bytes sig, address sender) returns (bool) {
       require(isChannel(model_id));
       Proof memory prf;
       prf.sender = msg.sender;
-      prf.merkle_root = merkle_root;
+      prf.merkle_root = merkleroot;
       prf.sigs = sigs;
 
       // FIXME

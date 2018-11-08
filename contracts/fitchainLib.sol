@@ -40,6 +40,7 @@ library fitchainLib {
         return bytesStringTrimmed;
     }
 
+	
     function concatenate3(bytes32 b1, bytes32 b2, bytes32 b3) internal pure returns (bytes) {
       // make space for 3 bytes32 vars
       bytes memory bytesString = new bytes(3 * 32);
