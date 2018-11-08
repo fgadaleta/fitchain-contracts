@@ -4,7 +4,7 @@ import "./FitchainLib.sol";
 
 /**
 @title Fitchain Validator Pool Contract
-@author: Fitchain Team
+@author Fitchain Team
 **/
 
 contract VPC {
@@ -20,6 +20,7 @@ contract VPC {
     event Updated(address indexed registrant, address registrar, bool active);
     event Withdrawn(address addr);
     event InitChannel(bytes32 channelId);
+
     /**
      * Error event.
      * event
@@ -47,14 +48,14 @@ contract VPC {
 
     // one channel is initialized for one model
     struct Channel {
+        bool active; // channel state
         bytes32 channel_id;   // assigned by contract
         bytes32 model_id;     // model to be verified in this channel
         uint k;               // proofs in this channel require k sigs
+        address[] verifiers;  // verifiers addresses
     }
 
-    mapping(bytes32 => address[]) public channelVerifiers;
-    mapping(bytes32 => bool) public isChannelActive;
-    mapping(bytes32 => Channel) public channelStructs;
+    mapping(bytes32 => Channel) public channels;
     bytes32[] public channelList;
 
     // Data structure containing the single proof for a model
@@ -90,8 +91,12 @@ contract VPC {
     }
 
     modifier isValidInitChannelReq(bytes32 channelId, uint256 k) {
-        require(!isChannel(channelId), 'Channel Id already exists');
         require(k > MIN_NUM_VERIFIERS, 'Invalid minimum number of verifiers');
+        _;
+    }
+
+    modifier isChannel(bytes32 channelId) {
+        require (channels[channelId].active, 'Channel Id already exists');
         _;
     }
 
@@ -99,43 +104,43 @@ contract VPC {
     //   * Construct registry with and starting registrants lenght of one,
     //   * and registrar as msg.sender
     //   */
-    //   constructor() public{
-    //         registrar = msg.sender;
-    //         registrants.length++;
-    //   }
+    constructor() public{
+        registrar = msg.sender;
+        registrants.length++;
+    }
     // submit_proof(service_id, model_id, merkleroot, tx_eot, sig, sender_addr)
     // bytes32, bytes32, string, string, bytes, address
     // submit proof of training to model
 
-    function submitProof(bytes32 service_id, bytes32 model_id, string merkleroot, string eot,  bytes sig, address sender) returns (bool) {
-        require(isChannel(model_id));
-        Proof memory prf;
-        prf.sender = msg.sender;
-        prf.merkle_root = merkleroot;
-        prf.sigs = sig;
+    function submitProof(bytes32 serviceId, bytes32 modelId, string merkleroot, string eot,  bytes sig, address sender)
+    public isChannel(modelId) returns (bool) {
+        // Proof memory prf;
+        // prf.sender = msg.sender;
+        // prf.merkle_root = merkleroot;
+        // prf.sigs = sig;
         // FIXME
         // proof key = hash(sender + model_id + merkle_root)
         // sender + merkle_root should be enough because we store it to potStructs[model_id]
         // there we go with the pot hash :)
 
-        bytes memory pot_hash = fitchainLib.concatenate3(bytes32(msg.sender), model_id, merkle_root);
-        bytes32 prf_key = keccak256(pot_hash);
+        // bytes memory pot_hash = fitchainLib.concatenate3(bytes32(msg.sender), model_id, merkle_root);
+        // bytes32 prf_key = keccak256(pot_hash);
 
-        // check if this proof has been submitted already
-        bool prf_exist = potStructs[model_id].proofsSubmitted[prf_key];
-        if(prf_exist == true){
-            emit Error(6);
-            return false;
-        }
-        potStructs[model_id].proofsList.push(prf_key);
-        potStructs[model_id].proofStructs[prf_key] = prf;
-        potStructs[model_id].proofsSubmitted[prf_key] = true;
-        // update merkle counter for this pot
-        uint count = potStructs[model_id].merkle_counters[merkle_root];
-        potStructs[model_id].merkle_counters[merkle_root] = count+1;
-        // TODO
-        // check number of current submissions
-        // call isPotValid() (rename to isPotGood? :)
+        // // check if this proof has been submitted already
+        // bool prf_exist = potStructs[model_id].proofsSubmitted[prf_key];
+        // if(prf_exist == true){
+        //     emit Error(6);
+        //     return false;
+        // }
+        // potStructs[model_id].proofsList.push(prf_key);
+        // potStructs[model_id].proofStructs[prf_key] = prf;
+        // potStructs[model_id].proofsSubmitted[prf_key] = true;
+        // // update merkle counter for this pot
+        // uint count = potStructs[model_id].merkle_counters[merkle_root];
+        // potStructs[model_id].merkle_counters[merkle_root] = count+1;
+        // // TODO
+        // // check number of current submissions
+        // // call isPotValid() (rename to isPotGood? :)
         return true;
     }
 
@@ -145,17 +150,15 @@ contract VPC {
     }
 
     // given the model_id return the list of proof keys
-    function getProofsList(bytes32 model_id) public constant returns(bytes32[]) {
-        require(isChannel(model_id));
-        return potStructs[model_id].proofsList;
+    function getProofsList(bytes32 channelId) public isChannel(channelId) view returns(bytes32[]) {
+        return potStructs[channelId].proofsList;
     }
 
     // given proof_key return the proof fields
     // TODO: make this internal
 
-    function getProof(bytes32 model_id, bytes32 proof_key) public constant returns(address, bytes32, bytes32[]) {
-        require(isChannel(model_id));
-        Proof memory proof = potStructs[model_id].proofStructs[proof_key];
+    function getProof(bytes32 channelId, bytes32 proofKey) public isChannel(channelId) returns(address, bytes32, bytes32[]) {
+        Proof memory proof = potStructs[channelId].proofStructs[proofKey];
         return (proof.sender, proof.merkle_root, proof.sigs);
     }
 
@@ -185,42 +188,34 @@ contract VPC {
     function getValidationInfo(bytes32 model_id, bytes32 merkle_root) public constant returns(uint) {
         return potStructs[model_id].merkle_counters[merkle_root];
     }
-    function isChannel(bytes32 check) public view returns(bool isIndeed) {
-        return isChannelActive[check];
-    }
 
-    function initChannel(bytes32 channelId, uint k) public isValidInitChannelReq(channelId, k) returns (bool success) {
+
+
+    function initChannel(bytes32 channelId, uint256 k) public isChannel(channelId) isValidInitChannelReq(channelId, k) returns (bool success) {
         channelList.push(channelId);
-        channelStructs[channelId].channel_id = channelId;
-        channelStructs[channelId].model_id = channelId;
-        channelStructs[channelId].k = k;
-        isChannelActive[channelId] = true;
-        // allocate verifiers to this channel
-        channelVerifiers[channelId] = new address[](0x0);
+        channels[channelId] = Channel(true, channelId, channelId, k, new address[](0));
         // allocate proof of training for the model in this channel
         potStructs[channelId].proofsList = new bytes32[](0x0);
         //pots[model_id] = new bytes32[](0x0);
         // nominate verifiers for this channel
         address[] memory vAddrs = getEligibleProposer(k);
-        for(uint i=0; i<vAddrs.length; i++) {
-            channelVerifiers[channelId].push(vAddrs[i]);
+        for(uint256 i=0; i<vAddrs.length; i++) {
+            channels[channelId].verifiers.push(vAddrs[i]);
             registrantBusy[vAddrs[i]] = true;   // this verifier is busy
         }
-        InitChannel(channelId);
+        emit InitChannel(channelId);
         return true;
     }
 
-    function getChannel(bytes32 channelId) public view returns(bytes32, uint) {
-        require(isChannel(channelId));
-        return (channelStructs[channelId].model_id, channelStructs[channelId].k);
+    function getChannel(bytes32 channelId) public isChannel(channelId) view returns(bytes32, uint) {
+        return (channels[channelId].model_id, channels[channelId].k);
     }
 
-    function getVerifiers(bytes32 channel_id) public constant returns (address[]) {
-        require(isChannel(channel_id));
-        return channelVerifiers[channel_id];
+    function getVerifiers(bytes32 channelId) public isChannel(channelId) view returns (address[]) {
+        return channels[channelId].verifiers;
     }
 
-    function getNumberOfChannels() public constant returns (uint count) {
+    function getNumberOfChannels() public view returns (uint count) {
         return channelList.length;
     }
 
@@ -324,26 +319,23 @@ contract VPC {
          return registrants[index].stake;
      }
 
-
-	  /**
-    * Returns number of active registrants in the registrar
+    /**
+     * Returns number of active registrants in the registrar
     */
-
-  function getNumberRegistrants() public constant returns (uint) {
-		    uint total = 0;
-		    for(uint j=1;j<registrants.length;j++){
-			     if(registrants[j].active == true) {
-			          total++;
-			            }
-		    }
-      return total;
+    function getNumberRegistrants() public constant returns (uint) {
+        uint total = 0;
+        for(uint j=1;j<registrants.length;j++){
+            if(registrants[j].active == true) {
+                total++;
+            }
+        }
+        return total;
     }
 
     /*
      * Function to reject value sends to the contract.
      * fallback_function
      */
-
     function () noEther public  {}
 
     /*
@@ -376,7 +368,7 @@ contract VPC {
             return getRegistrants();
 
         }
-        uint[] memory selected = new uint[](num_verifiers);  // array of the indexes of selected verifiers
+        uint256[] memory selected = new uint[](num_verifiers);  // array of the indexes of selected verifiers
         address[] memory v_addr = getRegistrants();  // addresses of active registrants
         // get block.hash
         uint blockNumber = block.number;
