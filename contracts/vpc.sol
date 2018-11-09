@@ -16,6 +16,7 @@ contract VerifiersPool is Ownable {
     // lighting channels
     struct Channel {
         bool state;
+        address owner;
         bytes32 proof;
         address[] verifiers;
     }
@@ -25,6 +26,7 @@ contract VerifiersPool is Ownable {
         bool verified;
         uint256 MofNSigs; // M of (N=channel[channelId].verifers.length) verified signatures for the same proof
         bytes32 channelId;
+        bytes32[] results;
         bytes32[] proofHashs;
         bytes[] signatures;
     }
@@ -43,10 +45,11 @@ contract VerifiersPool is Ownable {
     address[] private verifiersSet;
 
     // events
+    event VerifierRegistered(address verifier);
+    event VerifierDeregistered(address verifeir);
     event ChannelInitialized(bytes32 channelId, address[] verifiers, bytes32 proofId);
-    event VerifierRegistered(address verifier, bool state);
-    event VerifierDeregistered(address verifeir, bool state);
-    event ProofOfTraining(bytes32 channelId, bytes32 proofId, bool state, address[] verifeirs);
+    event ProofOfTraining(bytes32 channelId, bytes32 proofId, address verifier, bytes32 proofHash);
+    event PoTValidated(bytes32 channelId, bytes32 proofId);
 
 
     // access control modifiers
@@ -81,6 +84,11 @@ contract VerifiersPool is Ownable {
 
     modifier canVerify(bytes32 channelId) {
         require(verifiers[msg.sender].currChannelId == channelId, 'invalid channelId!');
+        _;
+    }
+
+    modifier isPotValidated(bytes32 channelId) {
+        require(proofs[channels[channelId].proof].verified, 'Unable to terminate channel, PoT not validated yet!');
         _;
     }
 
@@ -120,24 +128,29 @@ contract VerifiersPool is Ownable {
         // TODO: move ether 'stak' to the contract
         verifiers[msg.sender] = Verifier(false, true, bytes32(0), msg.value);
         verifiersSet.push(msg.sender);
-        emit VerifierRegistered(msg.sender, true);
+        emit VerifierRegistered(msg.sender);
         return true;
     }
 
     function deregisterVerifier() public canDeregisterVerifier() returns(bool) {
         verifiers[msg.sender].registered = false;
         // TODO: tranfer stak to the verifier address
-        emit VerifierDeregistered(msg.sender, true);
+        emit VerifierDeregistered(msg.sender);
         return true;
     }
 
-    function initChannel(bytes32 channelId, uint256 KVerifiers, uint256 mOfN) public requireKVerifiers(KVerifiers, mOfN) isValidChannelId(channelId) returns(bool) {
+    function initChannel(bytes32 channelId, uint256 KVerifiers, uint256 mOfN, address owner) public requireKVerifiers(KVerifiers, mOfN) isValidChannelId(channelId) returns(bool) {
         bytes32 proofId = keccak256(abi.encodePacked(channelId, block.number, msg.sender));
-        proofs[proofId] = Proof(false, mOfN, channelId, new bytes32[](0), new bytes[](0));
-        channels[channelId] = Channel(true, proofId, new address[](0));
+        proofs[proofId] = Proof(false, mOfN, channelId, new bytes32[](0), new bytes32[](0), new bytes[](0));
+        channels[channelId] = Channel(true, owner, proofId,new address[](0));
         // TODO: set state of the verifier to 1 (busy)
         require(getKVerifiers(channelId, KVerifiers), 'Unable to initialize channel');
         emit ChannelInitialized(channelId, channels[channelId].verifiers, proofId);
+        return true;
+    }
+
+    function terminateChannel(bytes32 channelId) public isPotValidated(channelId) returns(bool) {
+        channels[channelId].state = false;
         return true;
     }
 
@@ -166,17 +179,19 @@ contract VerifiersPool is Ownable {
         return (verifier == ECDSA.recover(hash, signature));
     }
 
-    function submitProof(bytes32 channelId, string eot, bytes32[] merkleroot, bytes signature) public canVerify(channelId) returns(bool) {
-        bytes32 prefixedHash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(channelId, merkleroot, eot)));
+    function submitProof(bytes32 channelId, string eot, bytes32[] merkleroot, bytes signature, bytes32 result) public canVerify(channelId) returns(bool) {
+        bytes32 prefixedHash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(channelId, merkleroot, eot, result)));
         if(isValidSignature(prefixedHash, signature, msg.sender)){
                 proofs[channels[channelId].proof].signatures.push(signature);
                 proofs[channels[channelId].proof].proofHashs.push(prefixedHash);
+                proofs[channels[channelId].proof].results.push(result);
+                emit ProofOfTraining(channelId, channels[channelId].proof, msg.sender, prefixedHash);
                 return true;
         }
         return false;
     }
 
-    function setValidProof(bytes32 channelId) public returns (bool){
+    function validateProof(bytes32 channelId) public returns (bool){
         uint256 kValidProofs = 0;
         for(uint256 i=0; i<proofs[channels[channelId].proof].signatures.length; i++){
             if(i < proofs[channels[channelId].proof].signatures.length -1){
@@ -192,6 +207,7 @@ contract VerifiersPool is Ownable {
                 verifiers[channels[channelId].verifiers[j]].currChannelId = bytes32(0);
                 verifiers[channels[channelId].verifiers[j]].state = false;
             }
+            emit PoTValidated(channelId, channels[channelId].proof);
             return true;
         }
         return false;
