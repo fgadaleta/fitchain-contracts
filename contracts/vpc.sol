@@ -69,6 +69,8 @@ contract VerifiersPool is Ownable {
     }
 
     modifier canDeregisterVerifier() {
+        require(verifiers[msg.sender].currChannelId == bytes32(0), 'Verifier curretly part of channel');
+        require(!verifiers[msg.sender].state, 'Can not deregister verifier is busy');
         _;
     }
 
@@ -107,6 +109,7 @@ contract VerifiersPool is Ownable {
             // set the verifier's current channel
             for (uint256 l=0; l <= channels[channelId].verifiers.length; l++){
                 verifiers[channels[channelId].verifiers[l]].currChannelId = channelId;
+                verifiers[channels[channelId].verifiers[l]].state = true;
             }
             return true;
         }
@@ -132,6 +135,7 @@ contract VerifiersPool is Ownable {
         bytes32 proofId = keccak256(abi.encodePacked(channelId, block.number, msg.sender));
         proofs[proofId] = Proof(false, mOfN, channelId, new bytes32[](0), new bytes[](0));
         channels[channelId] = Channel(true, proofId, new address[](0));
+        // TODO: set state of the verifier to 1 (busy)
         require(getKVerifiers(channelId, KVerifiers), 'Unable to initialize channel');
         emit ChannelInitialized(channelId, channels[channelId].verifiers, proofId);
         return true;
@@ -183,6 +187,13 @@ contract VerifiersPool is Ownable {
         }
         if(proofs[channels[channelId].proof].MofNSigs == kValidProofs) {
             proofs[channels[channelId].proof].verified = true;
+            // free verifiers
+            for (uint j=0; j < channels[channelId].verifiers.length; j++){
+                verifiers[channels[channelId].verifiers[j]].currChannelId = bytes32(0);
+                verifiers[channels[channelId].verifiers[j]].state = false;
+            }
+            return true;
         }
+        return false;
     }
 }
