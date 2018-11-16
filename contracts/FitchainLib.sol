@@ -5,7 +5,7 @@ pragma solidity ^0.4.25;
 @author Francesco Gadaleta
 */
 
-library fitchainLib {
+library FitchainLib {
 	/*
     * @notice Concatenate two strings and hash them
     * @param b1 first bytes32 string
