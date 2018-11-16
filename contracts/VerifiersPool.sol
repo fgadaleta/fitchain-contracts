@@ -125,7 +125,7 @@ contract VerifiersPool is Ownable {
     }
 
     function registerVerifier() public canRegisterVerifier() isValidStake() payable returns(bool){
-        // TODO: move ether 'stak' to the contract
+        // TODO: move ether 'stake' to the contract
         verifiers[msg.sender] = Verifier(false, true, bytes32(0), msg.value);
         verifiersSet.push(msg.sender);
         emit VerifierRegistered(msg.sender);
@@ -134,7 +134,7 @@ contract VerifiersPool is Ownable {
 
     function deregisterVerifier() public canDeregisterVerifier() returns(bool) {
         verifiers[msg.sender].registered = false;
-        // TODO: tranfer stak to the verifier address
+        // TODO: tranfer stake to the verifier address
         emit VerifierDeregistered(msg.sender);
         return true;
     }
