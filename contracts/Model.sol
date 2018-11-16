@@ -1,7 +1,7 @@
 pragma solidity 0.4.25;
 
 /**
-@title Ocean Protocol ERC20 Token Contract
+@title Fitchain Data Science Algorithms and Models
 @author Team: Fitchain Team
 */
 

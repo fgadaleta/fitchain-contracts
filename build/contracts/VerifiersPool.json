@@ -1,0 +1,95 @@
+{
+  "contractName": "VerifiersPool",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a72305820ed4e7a3d916ba70e6ea3471fcb9e9deaff1515184c32bfa29161335538a08ba80029",
+  "deployedBytecode": "0x6080604052600080fd00a165627a7a72305820ed4e7a3d916ba70e6ea3471fcb9e9deaff1515184c32bfa29161335538a08ba80029",
+  "sourceMap": "98:27:6:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;98:27:6;;;;;;;",
+  "deployedSourceMap": "98:27:6:-;;;;;",
+  "source": "pragma solidity 0.4.25;\n\n/**\n@title Fitchain Model Verifiers Pool\n@author Team: Fitchain Team\n*/\n\ncontract VerifiersPool {\n\n}",
+  "sourcePath": "/Users/ahmed/Documents/github_projects/aabdulwahed/fitchain-contracts/contracts/VerifiersPool.sol",
+  "ast": {
+    "absolutePath": "/Users/ahmed/Documents/github_projects/aabdulwahed/fitchain-contracts/contracts/VerifiersPool.sol",
+    "exportedSymbols": {
+      "VerifiersPool": [
+        1301
+      ]
+    },
+    "id": 1302,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1300,
+        "literals": [
+          "solidity",
+          "0.4",
+          ".25"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:6"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Fitchain Model Verifiers Pool\n@author Team: Fitchain Team",
+        "fullyImplemented": true,
+        "id": 1301,
+        "linearizedBaseContracts": [
+          1301
+        ],
+        "name": "VerifiersPool",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 1302,
+        "src": "98:27:6"
+      }
+    ],
+    "src": "0:125:6"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/ahmed/Documents/github_projects/aabdulwahed/fitchain-contracts/contracts/VerifiersPool.sol",
+    "exportedSymbols": {
+      "VerifiersPool": [
+        1301
+      ]
+    },
+    "id": 1302,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1300,
+        "literals": [
+          "solidity",
+          "0.4",
+          ".25"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:6"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Fitchain Model Verifiers Pool\n@author Team: Fitchain Team",
+        "fullyImplemented": true,
+        "id": 1301,
+        "linearizedBaseContracts": [
+          1301
+        ],
+        "name": "VerifiersPool",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 1302,
+        "src": "98:27:6"
+      }
+    ],
+    "src": "0:125:6"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.25+commit.59dbf8f1.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.0-beta.0",
+  "updatedAt": "2018-11-16T14:02:12.236Z"
+}
