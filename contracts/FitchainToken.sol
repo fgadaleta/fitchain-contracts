@@ -4,7 +4,7 @@ import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol';
 
 /**
-@title Ocean Protocol ERC20 Token Contract
+@title Fitchain ERC20 Token Contract
 @author Team: Fitchain Team
 */
 
