@@ -3,7 +3,7 @@ pragma solidity 0.4.25;
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 /**
-@title Fitchain Actor Registry
+@title Fitchain Actors Registry
 @author Team: Fitchain Team
 */
 
@@ -17,6 +17,7 @@ contract Registry is Ownable {
 
     mapping(address => Registrant) registrants;
     mapping(address => bool) actorContractsTypes;
+    mapping(address => address[]) contractType2Registrants;
 
     modifier canDeregister() {
         require(!registrants[msg.sender].isActive, 'Registrant is active, can not dergister');
@@ -49,6 +50,9 @@ contract Registry is Ownable {
 
     function registerActor(address[] actorTypes, bool active) public onlyNotRegistered() onlyValidTypes(actorTypes) returns(bool) {
         registrants[msg.sender] = Registrant(true, active, actorTypes);
+        for(uint i=0; i<= actorTypes.length; i++){
+            contractType2Registrants[actorTypes[i]].push(msg.sender);
+        }
         return true;
     }
 
@@ -74,6 +78,7 @@ contract Registry is Ownable {
 
     function deregisterActorType(address actorType) public onlyOwner() returns(bool) {
         actorContractsTypes[actorType] = false;
+        contractType2Registrants[actorType].length = 0;
         return true;
     }
 
@@ -87,5 +92,9 @@ contract Registry is Ownable {
 
     function isValidActorType(address actorType) public view returns(bool){
         return actorContractsTypes[actorType];
+    }
+
+    function getAllRegistrantsByContractType(address actorType) public view returns(address[]) {
+        return contractType2Registrants[actorType];
     }
 }
