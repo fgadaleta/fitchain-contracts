@@ -114,6 +114,7 @@ contract Registry is Ownable {
         for (uint256 i=0; i < contractType2Registrants[actorType].length; i++){
             if(registrants[contractType2Registrants[actorType][i]].slots >= 1)
             actors[j] = contractType2Registrants[actorType][i];
+            j++;
         }
     }
 
