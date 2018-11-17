@@ -12,6 +12,7 @@ contract Registry is Ownable {
     struct Registrant {
         bool exists;
         bool isActive;
+        uint256 slots;
         address[] actorTypes;
     }
 
@@ -48,8 +49,18 @@ contract Registry is Ownable {
         _;
     }
 
-    function registerActor(address[] actorTypes, bool active) public onlyNotRegistered() onlyValidTypes(actorTypes) returns(bool) {
-        registrants[msg.sender] = Registrant(true, active, actorTypes);
+    modifier canChangeSlots(address actor){
+        address actorType = address(0);
+        for (uint256 i=0; i<= registrants[actor].actorTypes.length; i++){
+            if(msg.sender == registrants[actor].actorTypes[i]) actorType = registrants[actor].actorTypes[i];
+        }
+        require(actorType == msg.sender, 'unable to change the number of slots');
+        _;
+    }
+
+    function registerActor(address[] actorTypes, bool active, uint256 slots) public onlyNotRegistered() onlyValidTypes(actorTypes) returns(bool) {
+        //TODO: validate slots number and avoid integer overflow/underflow.
+        registrants[msg.sender] = Registrant(true, active, slots, actorTypes);
         for(uint i=0; i<= actorTypes.length; i++){
             contractType2Registrants[actorTypes[i]].push(msg.sender);
         }
@@ -90,11 +101,29 @@ contract Registry is Ownable {
         return registrants[actor].isActive;
     }
 
+    function getActorActiveSlots(address actor) public view returns(uint256) {
+        return registrants[actor].slots;
+    }
+
     function isValidActorType(address actorType) public view returns(bool){
         return actorContractsTypes[actorType];
     }
 
-    function getAllRegistrantsByContractType(address actorType) public view returns(address[]) {
-        return contractType2Registrants[actorType];
+    function getAvaliableRegistrantsByType(address actorType) public view returns(address[] actors) {
+        uint256 j =0;
+        for (uint256 i=0; i < contractType2Registrants[actorType].length; i++){
+            if(registrants[contractType2Registrants[actorType][i]].slots >= 1)
+            actors[j] = contractType2Registrants[actorType][i];
+        }
+    }
+
+    function decrementActorSlots(address actor) public canChangeSlots(actor) returns(bool){
+        //TODO: this operation not secure
+        registrants[actor].slots -=1;
+    }
+
+    function incrementActorSlots(address actor) public canChangeSlots(actor) returns(bool){
+        //TODO: this operation not secure
+        registrants[actor].slots +=1;
     }
 }
