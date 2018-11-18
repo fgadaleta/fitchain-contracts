@@ -7,7 +7,7 @@ import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 @author Team: Fitchain Team
 */
 
-contract Registry is Ownable {
+contract FitchainRegistry is Ownable {
 
     struct Registrant {
         bool exists;

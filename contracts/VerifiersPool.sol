@@ -8,6 +8,6 @@ import './Stake.sol';
 @author Team: Fitchain Team
 */
 
-contract VerifiersPool is Registry, FitchainStake {
+contract VerifiersPool is FitchainRegistry, FitchainStake {
 
 }
