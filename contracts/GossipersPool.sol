@@ -9,7 +9,7 @@ import './Registry.sol';
 @author Team: Fitchain Team
 */
 
-contract GossipersPool is Ownable {
+contract GossipersPool is Registry {
 
     // lighting channels
     struct Channel {
@@ -39,8 +39,6 @@ contract GossipersPool is Ownable {
     mapping(bytes32 => Channel) channels;
     mapping(bytes32 => Proof) proofs;
     mapping(address => GPCsettings) settings;
-
-    Registry private registry;
 
     // events
     event ChannelInitialized(bytes32 channelId, address[] gossipers, bytes32 proofId);
@@ -82,14 +80,12 @@ contract GossipersPool is Ownable {
     }
 
     // init VPC settings
-    constructor(uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake, address _registry) public {
-        require(_registry != address(0), 'Invalid registry contract address');
+    constructor(uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
         settings[address(this)] = GPCsettings(_minKGossipers, _maxKGossipers, _minStake);
-        registry = Registry(_registry);
     }
 
     function getAvailableGossipers() private view returns(address[]){
-        return registry.getAvaliableRegistrantsByType(address(this));
+        return super.getAvaliableRegistrants();
     }
 
     function getKGossipers(bytes32 channelId, uint256 K) private returns(uint256){
@@ -97,7 +93,7 @@ contract GossipersPool is Ownable {
         for(uint256 i=0; i< K; i++){
             channels[channelId].gossipers.push(gossipersSet[i]);
             // TODO: decrease the number of the available slots for the gossiper
-            registry.decrementActorSlots(gossipersSet[i]);
+            super.decrementActorSlots(gossipersSet[i]);
         }
         return channels[channelId].gossipers.length;
     }
@@ -164,7 +160,7 @@ contract GossipersPool is Ownable {
             proofs[channels[channelId].proof].isVerified = true;
             // free gossipers
             for (uint j=0; j < channels[channelId].gossipers.length; j++){
-                registry.incrementActorSlots(channels[channelId].gossipers[i]);
+                super.incrementActorSlots(channels[channelId].gossipers[i]);
                 //TODO: free the gossiper stake
             }
             emit PoTValidated(channelId, channels[channelId].proof);
