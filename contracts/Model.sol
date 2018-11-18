@@ -1,11 +1,14 @@
 pragma solidity ^0.4.25;
 
+import './Registry.sol';
+import './Stake.sol';
+
 /**
 @title Fitchain Model Contract
 @author Team: Fitchain Team
 */
 
-contract FitchainModel {
+contract FitchainModel is Registry, FitchainStake {
 
     // fitchain model
     struct Model {

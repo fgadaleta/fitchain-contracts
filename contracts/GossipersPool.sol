@@ -10,7 +10,7 @@ import './Stake.sol';
 @author Team: Fitchain Team
 */
 
-contract GossipersPool is Registry, Stake {
+contract GossipersPool is Registry, FitchainStake {
 
     // lighting channels
     struct Channel {
