@@ -30,17 +30,20 @@ contract FitchainRegistry is Ownable, FitchainStake {
         _;
     }
 
-    function register(address actor, uint256 slots, uint256 stake) internal onlyNotExist(actor) returns(bool) {
+    function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) internal onlyNotExist(actor) returns(bool) {
         require(slots >= 1, 'invalid number of free slots');
         registrants[actor] = Registrant(true, slots, slots);
-        super.stake(keccak256(abi.encodePacked(address(this))), actor, slots * stake);
+        stake(stakeId, actor, slots * amount);
         addActorToRegistry(actor);
         return true;
     }
 
-    function deregister(address actor) internal onlyFreeSlots(actor) returns (bool) {
+    function deregister(address actor, bytes32 stakeId) internal onlyFreeSlots(actor) returns (bool) {
+        uint256 amount = getStakebyActor(stakeId, actor);
+        require(amount > 0, 'indicating empty stake!');
         registrants[actor].exists = false;
-        return removeActorFromRegistry(actor);
+        removeActorFromRegistry(actor);
+        return release(stakeId, actor, amount);
     }
 
     function isActorRegistered(address actor) public view returns(bool) {

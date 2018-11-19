@@ -59,8 +59,8 @@ contract GossipersPool is FitchainRegistry {
         _;
     }
 
-    modifier isValidStake(){
-        require(msg.value >= settings[address(this)].minStake);
+    modifier onlyValidStake(uint256 amount){
+        require(amount >= settings[address(this)].minStake);
         _;
     }
 
@@ -81,6 +81,14 @@ contract GossipersPool is FitchainRegistry {
     // init GPC settings
     constructor(uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
         settings[address(this)] = GPCsettings(_minKGossipers, _maxKGossipers, _minStake);
+    }
+
+    function registerGossiper(uint256 amount, uint256 slots) public onlyValidStake(amount) returns(bool){
+        return register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
+    }
+
+    function deregisterGossiper(address actor) public returns(bool){
+        return deregister(actor,  keccak256(abi.encodePacked(address(this))));
     }
 
     function getAvailableGossipers() private view returns(address[]){
@@ -113,7 +121,7 @@ contract GossipersPool is FitchainRegistry {
         return true;
     }
 
-    function getChannelVerifiers(bytes32 channelId) public view returns(address[]) {
+    function getChannelGossipers(bytes32 channelId) public view returns(address[]) {
         return channels[channelId].gossipers;
     }
 
