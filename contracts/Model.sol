@@ -33,6 +33,7 @@ contract FitchainModel is FitchainStake {
     //events
     event ModelCreated(bytes32 modelId, address owner, bool state);
     event StakeReleased(bytes32 modelId, address to, uint256 amount);
+    event ModelPublished(bytes32 modelId, bytes32 location, uint256 format, string modelType, bytes inputSignature);
 
     modifier notExist(bytes32 modelId){
         require(!models[modelId].exist, 'Model already exist');
@@ -80,6 +81,7 @@ contract FitchainModel is FitchainStake {
         models[modelId].format = _format;
         models[modelId].modelType = _modelType;
         models[modelId].inputSignature = _inputSignature;
+        emit ModelPublished(modelId, _location, _format, _modelType, _inputSignature);
         return true;
     }
 
@@ -87,6 +89,10 @@ contract FitchainModel is FitchainStake {
         super.release(modelId, models[modelId].owner, minStake);
         emit StakeReleased(modelId, models[modelId].owner, minStake);
         return true;
+    }
+
+    function isModelValidated(bytes32 modelId) public view returns(bool){
+        return (models[modelId].isTrained && models[modelId].isVerfied);
     }
 
     function setModelTrained(bytes32 modelId) public onlyValidatedModel(modelId) returns(bool) {
