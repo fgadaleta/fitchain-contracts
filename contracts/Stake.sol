@@ -29,7 +29,7 @@ contract FitchainStake {
         return false;
     }
 
-    function stake(bytes32 stakeId, address actor, uint256 amount) public returns(bool){
+    function stake(bytes32 stakeId, address actor, uint256 amount) internal returns(bool){
         require(token.balanceOf(actor) > amount, 'insufficient fund');
         if(token.transferFrom(actor, address(this), amount)){
             stakes[stakeId].actors[actor] += amount;

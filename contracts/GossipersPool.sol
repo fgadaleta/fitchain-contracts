@@ -2,14 +2,13 @@ pragma solidity ^0.4.25;
 
 import 'openzeppelin-solidity/contracts/cryptography/ECDSA.sol';
 import './Registry.sol';
-import './Stake.sol';
 
 /**
 @title Fitchain Gossipers Pool Contract
 @author Team: Fitchain Team
 */
 
-contract GossipersPool is FitchainRegistry, FitchainStake {
+contract GossipersPool is FitchainRegistry {
 
     // lighting channels
     struct Channel {
