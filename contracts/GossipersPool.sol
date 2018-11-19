@@ -84,11 +84,11 @@ contract GossipersPool is FitchainRegistry {
     }
 
     function registerGossiper(uint256 amount, uint256 slots) public onlyValidStake(amount) returns(bool){
-        return register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
+        return super.register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
     }
 
     function deregisterGossiper(address actor) public returns(bool){
-        return deregister(actor,  keccak256(abi.encodePacked(address(this))));
+        return super.deregister(actor,  keccak256(abi.encodePacked(address(this))));
     }
 
     function getAvailableGossipers() private view returns(address[]){
@@ -110,13 +110,16 @@ contract GossipersPool is FitchainRegistry {
         bytes32 proofId = keccak256(abi.encodePacked(channelId, block.number, msg.sender));
         proofs[proofId] = Proof(false, mOfN, channelId, new bytes32[](0), new bytes32[](0), new bytes[](0));
         channels[channelId] = Channel(true, owner, proofId,new address[](0));
-        // TODO: set state of the verifier to 1 (busy)
         require(getKGossipers(channelId, KGossipers) == KGossipers , 'Unable to initialize channel');
+        for (uint256 i=0; i<channels[channelId].gossipers.length; i++){
+            decrementActorSlots(channels[channelId].gossipers[i]);
+        }
         emit ChannelInitialized(channelId, channels[channelId].gossipers, proofId);
         return true;
     }
 
     function terminateChannel(bytes32 channelId) public isPotValidated(channelId) returns(bool) {
+        if(!channels[channelId].state) return true;
         channels[channelId].state = false;
         return true;
     }
@@ -137,6 +140,9 @@ contract GossipersPool is FitchainRegistry {
         return (proofs[proofId].isVerified, proofs[proofId].channelId, proofs[proofId].proofHashs);
     }
 
+    function isValidProof(bytes32 proofId) public view returns(bool) {
+        return proofs[proofId].isVerified;
+    }
 
     function isValidSignature(bytes32 hash, bytes signature, address gossiper) private pure returns (bool){
         return (gossiper == ECDSA.recover(hash, signature));
@@ -167,7 +173,7 @@ contract GossipersPool is FitchainRegistry {
             proofs[channels[channelId].proof].isVerified = true;
             // free gossipers
             for (uint j=0; j < channels[channelId].gossipers.length; j++){
-                super.incrementActorSlots(channels[channelId].gossipers[i]);
+                incrementActorSlots(channels[channelId].gossipers[i]);
                 //TODO: free the gossiper stake
             }
             emit PoTValidated(channelId, channels[channelId].proof);
