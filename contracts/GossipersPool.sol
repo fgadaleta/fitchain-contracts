@@ -1,7 +1,7 @@
 pragma solidity ^0.4.25;
 
 import 'openzeppelin-solidity/contracts/cryptography/ECDSA.sol';
-import './Registry.sol';
+import './FitchainRegistry.sol';
 
 /**
 @title Fitchain Gossipers Pool Contract

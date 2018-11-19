@@ -1,7 +1,7 @@
 pragma solidity 0.4.25;
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import './Stake.sol';
+import './FitchainStake.sol';
 
 /**
 @title Fitchain Actors Registry

@@ -1,6 +1,6 @@
 pragma solidity 0.4.25;
 
-import './Registry.sol';
+import './FitchainRegistry.sol';
 
 /**
 @title Fitchain Model Verifiers Pool
