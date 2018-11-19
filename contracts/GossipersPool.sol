@@ -1,7 +1,6 @@
 pragma solidity ^0.4.25;
 
 import 'openzeppelin-solidity/contracts/cryptography/ECDSA.sol';
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './Registry.sol';
 import './Stake.sol';
 
@@ -80,7 +79,7 @@ contract GossipersPool is FitchainRegistry, FitchainStake {
         _;
     }
 
-    // init VPC settings
+    // init GPC settings
     constructor(uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
         settings[address(this)] = GPCsettings(_minKGossipers, _maxKGossipers, _minStake);
     }
@@ -100,12 +99,12 @@ contract GossipersPool is FitchainRegistry, FitchainStake {
     }
 
 
-    function initChannel(bytes32 channelId, uint256 KVerifiers, uint256 mOfN, address owner) public requireKGossipers(KVerifiers, mOfN) isValidChannelId(channelId) returns(bool) {
+    function initChannel(bytes32 channelId, uint256 KGossipers, uint256 mOfN, address owner) public requireKGossipers(KGossipers, mOfN) isValidChannelId(channelId) returns(bool) {
         bytes32 proofId = keccak256(abi.encodePacked(channelId, block.number, msg.sender));
         proofs[proofId] = Proof(false, mOfN, channelId, new bytes32[](0), new bytes32[](0), new bytes[](0));
         channels[channelId] = Channel(true, owner, proofId,new address[](0));
         // TODO: set state of the verifier to 1 (busy)
-        require(getKGossipers(channelId, KVerifiers) == KVerifiers , 'Unable to initialize channel');
+        require(getKGossipers(channelId, KGossipers) == KGossipers , 'Unable to initialize channel');
         emit ChannelInitialized(channelId, channels[channelId].gossipers, proofId);
         return true;
     }
