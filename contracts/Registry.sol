@@ -1,13 +1,14 @@
 pragma solidity 0.4.25;
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import './Stake.sol';
 
 /**
 @title Fitchain Actors Registry
 @author Team: Fitchain Team
 */
 
-contract Registry is Ownable {
+contract FitchainRegistry is Ownable, FitchainStake {
 
     struct Registrant {
         bool exists;
@@ -19,26 +20,30 @@ contract Registry is Ownable {
     address[] actors;
 
 
-    modifier onlyFreeSlots(){
-        require(registrants[msg.sender].slots == registrants[msg.sender].maxSlots, 'registrant is busy, please free slots!');
+    modifier onlyFreeSlots(address actor){
+        require(registrants[actor].slots == registrants[actor].maxSlots, 'registrant is busy, please free slots!');
         _;
     }
 
-    modifier onlyNotExist() {
-        require(!registrants[msg.sender].exists, 'Actor already exists!');
+    modifier onlyNotExist(address actor) {
+        require(!registrants[actor].exists, 'Actor already exists!');
         _;
     }
 
-    function register(uint256 slots) public onlyNotExist() returns(bool) {
+    function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) internal onlyNotExist(actor) returns(bool) {
         require(slots >= 1, 'invalid number of free slots');
-        registrants[msg.sender] = Registrant(true, slots, slots);
-        actors.push(msg.sender);
+        registrants[actor] = Registrant(true, slots, slots);
+        stake(stakeId, actor, slots * amount);
+        addActorToRegistry(actor);
         return true;
     }
 
-    function deregister() public onlyFreeSlots() returns (bool) {
-        registrants[msg.sender].exists = false;
-        return removeActor(msg.sender);
+    function deregister(address actor, bytes32 stakeId) internal onlyFreeSlots(actor) returns (bool) {
+        uint256 amount = getStakebyActor(stakeId, actor);
+        require(amount > 0, 'indicating empty stake!');
+        registrants[actor].exists = false;
+        removeActorFromRegistry(actor);
+        return release(stakeId, actor, amount);
     }
 
     function isActorRegistered(address actor) public view returns(bool) {
@@ -49,7 +54,7 @@ contract Registry is Ownable {
         return registrants[actor].slots;
     }
 
-    function removeActor(address actor)  private returns(bool) {
+    function removeActorFromRegistry(address actor)  private returns(bool) {
         for(uint256 j=0; j<actors.length; j++){
             if(actor == actors[j]){
                 for (uint i=j; i< actors.length-1; i++){
@@ -62,7 +67,7 @@ contract Registry is Ownable {
         return false;
     }
 
-    function addActor(address actor) private returns(bool) {
+    function addActorToRegistry(address actor) private returns(bool) {
         actors.push(actor);
         return true;
     }
@@ -75,7 +80,7 @@ contract Registry is Ownable {
         require(registrants[actor].slots > 0, 'invalid slots value');
         registrants[actor].slots -=1;
         if(registrants[actor].slots == 0){
-            return removeActor(actor);
+            return removeActorFromRegistry(actor);
         }
         return true;
     }
@@ -83,7 +88,7 @@ contract Registry is Ownable {
     function incrementActorSlots(address actor) internal returns(bool){
         require(registrants[actor].slots >=0, 'invalid slots value');
         if(registrants[actor].slots == 0){
-            addActor(actor);
+            addActorToRegistry(actor);
         }
         registrants[actor].slots +=1;
         return true;
