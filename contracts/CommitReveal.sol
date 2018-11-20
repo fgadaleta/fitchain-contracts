@@ -40,11 +40,11 @@ contract CommitReveal {
     }
 
     function reveal(bytes32 _commitmentId, string _value, bool _vote) public returns(bool){
-        require(!commitments[_commitmentId][msg.sender].exist);
-        require(commitments[_commitmentId][msg.sender].hash == keccak256(abi.encodePacked(_vote, _value)));
+        require(commitments[_commitmentId][msg.sender].exist, 'Commitment is not exist!');
+        require(settings[_commitmentId].timeout >= block.timestamp, 'invalid reveal timing!');
+        require(commitments[_commitmentId][msg.sender].hash == keccak256(abi.encodePacked(_vote, _value)), 'invalid commitment preimage');
         commitments[_commitmentId][msg.sender].vote = _vote;
         commitments[_commitmentId][msg.sender].value = _value;
         return true;
     }
-
 }
