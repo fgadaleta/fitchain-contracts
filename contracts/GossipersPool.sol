@@ -9,7 +9,7 @@ import './FitchainHelper.sol';
 @author Team: Fitchain Team
 */
 
-contract GossipersPool is FitchainRegistry, FitchainHelper {
+contract GossipersPool is FitchainHelper, FitchainRegistry {
 
     // lighting channels
     struct Channel {

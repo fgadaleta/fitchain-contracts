@@ -9,6 +9,6 @@ import './FitchainHelper.sol';
 @author Team: Fitchain Team
 */
 
-contract VerifiersPool is FitchainRegistry, CommitReveal, FitchainHelper {
+contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
 
 }
