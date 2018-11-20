@@ -1,12 +1,14 @@
 pragma solidity 0.4.25;
 
-import './Registry.sol';
+import './FitchainRegistry.sol';
+import './CommitReveal.sol';
+import './FitchainHelper.sol';
 
 /**
 @title Fitchain Model Verifiers Pool
 @author Team: Fitchain Team
 */
 
-contract VerifiersPool is FitchainRegistry {
+contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
 
 }

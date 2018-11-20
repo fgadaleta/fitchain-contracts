@@ -1,6 +1,6 @@
 pragma solidity ^0.4.25;
 
-import './Stake.sol';
+import './FitchainStake.sol';
 import './GossipersPool.sol';
 
 /**

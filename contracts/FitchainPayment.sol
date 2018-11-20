@@ -1,7 +1,7 @@
 pragma solidity ^0.4.25;
 
 import './FitchainToken.sol';
-import './Model.sol';
+import './FitchainModel.sol';
 
 /**
 @title Fitchain Payment Contract
