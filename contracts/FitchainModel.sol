@@ -2,6 +2,7 @@ pragma solidity ^0.4.25;
 
 import './FitchainStake.sol';
 import './GossipersPool.sol';
+import './VerifiersPool.sol';
 
 /**
 @title Fitchain Model Contract
@@ -27,7 +28,8 @@ contract FitchainModel is FitchainStake {
 
     mapping(bytes32 => Model) models;
     uint256 private minStake;
-    GossipersPool private gossiper;
+    GossipersPool private gossipersPool;
+    VerifiersPool private verifiersPool;
 
 
     //events
@@ -52,9 +54,10 @@ contract FitchainModel is FitchainStake {
         _;
     }
 
-    constructor(uint256 _minStake, address _gossiperContractAddress) public {
-        require(_gossiperContractAddress != address(0), 'invalid gossiper contract address');
-        gossiper = GossipersPool(_gossiperContractAddress);
+    constructor(uint256 _minStake, address _gossiperContractAddress, address _verifierContractAddress) public {
+        require(_gossiperContractAddress != address(0) && _verifierContractAddress != address(0), 'invalid gossiper contract address');
+        gossipersPool = GossipersPool(_gossiperContractAddress);
+        verifiersPool = VerifiersPool(_verifierContractAddress);
         minStake = _minStake;
     }
 
@@ -67,7 +70,7 @@ contract FitchainModel is FitchainStake {
                                     new string(0));
             // start goisspers channel
             // bytes32 channelId, uint256 KGossipers, uint256 mOfN, address owner
-            gossiper.initChannel(modelId, n, m, address(this));
+            gossipersPool.initChannel(modelId, n, m, address(this));
             emit ModelCreated(modelId, msg.sender, true);
             return true;
         }
@@ -96,10 +99,10 @@ contract FitchainModel is FitchainStake {
     }
 
     function setModelTrained(bytes32 modelId) public onlyValidatedModel(modelId) returns(bool) {
-        bytes32 proofId = gossiper.getProofIdByChannelId(modelId);
-        require(gossiper.isValidProof(proofId), 'Proof is not valid');
+        bytes32 proofId = gossipersPool.getProofIdByChannelId(modelId);
+        require(gossipersPool.isValidProof(proofId), 'Proof is not valid');
         // terminate channel
-        gossiper.terminateChannel(modelId);
+        gossipersPool.terminateChannel(modelId);
         models[modelId].isTrained = true;
     }
 }
