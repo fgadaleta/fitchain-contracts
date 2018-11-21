@@ -12,6 +12,7 @@ import './FitchainHelper.sol';
 contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
 
     struct Challenge{
+        bool exist;
         uint256 wallTime;
         bytes32 modelId;
         bytes32 proofId;
@@ -34,6 +35,8 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
     mapping (bytes32 => Challenge) challenges;
     mapping(bytes32 => Proof) proofs;
 
+    // events
+    event ChallengeInitialized(bytes32 challengeId, address[] verifiers, bytes32 proofId);
 
     // modifiers
     modifier onlyValidStake(uint256 amount){
@@ -46,15 +49,38 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
         _;
     }
 
+    modifier onlyExistChallenge(bytes32 challengeId){
+        require(challenges[challengeId].exist, 'challege does not exist!');
+        _;
+    }
+
+    modifier onlyNotExistChallenge(bytes32 challengeId) {
+        require(!challenges[challengeId].exist, 'challege already exist');
+        _;
+    }
+
     // init VPC settings
     constructor(uint256 _minKVerifiers, uint256 _minStake) public {
         VPCsettings[address(this)] = VPCSetting(_minKVerifiers, _minStake);
     }
 
-    function initChallenge(bytes32 modelId, address owner, bytes32 challengeId, uint256 wallTime,
-                          uint256 kVerifiers, bytes32 testingData) public returns(bool){
+    function initChallenge(bytes32 modelId, bytes32 challengeId, uint256 wallTime,
+                          uint256 kVerifiers, bytes32 testingData) public onlyNotExistChallenge(challengeId) returns(bool){
+        require(wallTime > 20, 'invalid wallTime, should be at least greater than average block interval');
+        address[] memory verifiers = getAvailableVerifiers();
+        if(verifiers.length >= kVerifiers){
+            challenges[challengeId] = Challenge(true, wallTime, modelId, challengeId, testingData, msg.sender, new address[](0));
+            require(kVerifiers == getKVerifiers(challengeId, kVerifiers), 'unable to set verifiers for challenge');
+            for (uint256 i=0; i < challenges[challengeId].verifiers.length; i++){
+                decrementActorSlots(challenges[challengeId].verifiers[i]);
+            }
+            emit ChallengeInitialized(challengeId, challenges[challengeId].verifiers, challengeId);
+            return true;
+        }
+        return false;
 
     }
+
     function getAvailableVerifiers() private view returns(address[]){
         return super.getAvaliableRegistrants();
     }
@@ -78,5 +104,9 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
 
     function isVerifiedProof(bytes32 proofId) public view onlyExistProof(proofId) returns(bool){
         return proofs[proofId].isVerified;
+    }
+
+    function getChallengeOwner(bytes32 challengeId) public view onlyExistChallenge(challengeId) returns(address){
+        return challenges[challengeId].owner;
     }
 }

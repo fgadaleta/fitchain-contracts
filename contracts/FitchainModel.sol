@@ -57,6 +57,7 @@ contract FitchainModel is FitchainStake {
     modifier onlyValidatedModel(bytes32 modelId){
         require(models[modelId].location != bytes32(0), 'model not exists');
         require(models[modelId].isTrained, 'Model is not trained yet!');
+        require(gossipersPool.getChannelOwner(modelId) == address(this), 'invalid channel owner');
         _;
     }
 
@@ -101,7 +102,7 @@ contract FitchainModel is FitchainStake {
     function verifyModel(bytes32 modelId, bytes32 challengId, uint256 kVerifiers, uint256 wallTime, bytes32 testingData) public onlyValidatedModel(modelId) onlyModelOwner(modelId) returns(bool){
         models[modelId].kVerifiers = kVerifiers;
         //init verification pool
-        verifiersPool.initChallenge(modelId, address(this), challengId, wallTime, kVerifiers, testingData);
+        verifiersPool.initChallenge(modelId, challengId, wallTime, kVerifiers, testingData);
     }
 
     function releaseStake(bytes32 modelId) public onlyVerifiedModel(modelId) returns(bool) {
@@ -139,9 +140,12 @@ contract FitchainModel is FitchainStake {
     }
 
     function setModelVerified(bytes32 modelId) public onlyValidatedModel(modelId) {
+
         for (uint256 i=0; i < models[modelId].verifiersPoolIds.length; i++){
+            require(verifiersPool.getChallengeOwner(models[modelId].verifiersPoolIds[i]) == address(this), 'invalid challenge owner');
             require(verifiersPool.isVerifiedProof(models[modelId].verifiersPoolIds[i]), 'invalid proof verification');
         }
         models[modelId].isVerfied = true;
     }
+
 }
