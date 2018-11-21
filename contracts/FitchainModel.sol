@@ -16,12 +16,14 @@ contract FitchainModel is FitchainStake {
         bool exist;
         bool isTrained;
         bool isVerfied;
+        uint256 kGossipers;
+        uint256 kVerifiers;
         uint256 format;
         address owner;
         bytes32 location;
         bytes32 paymentId;
         bytes32 gossipersPoolId;
-        bytes32 verifiersPoolId;
+        bytes32[] verifiersPoolIds;
         bytes inputSignature;
         string modelType;
     }
@@ -42,6 +44,11 @@ contract FitchainModel is FitchainStake {
         _;
     }
 
+    modifier onlyExist(bytes32 modelId) {
+        require(models[modelId].exist,'Model does not exist!');
+        _;
+    }
+
     modifier onlyModelOwner(bytes32 modelId){
         require(models[modelId].owner == msg.sender, 'invalid model owner');
         _;
@@ -49,8 +56,12 @@ contract FitchainModel is FitchainStake {
 
     modifier onlyValidatedModel(bytes32 modelId){
         require(models[modelId].location != bytes32(0), 'model not exists');
-        require(models[modelId].isTrained, 'Model not trained yet!');
-        // require(models[modelId].isVerfied, 'Model not verified yet!');
+        require(models[modelId].isTrained, 'Model is not trained yet!');
+        _;
+    }
+
+    modifier onlyVerifiedModel(bytes32 modelId){
+        require(models[modelId].isVerfied, 'Model is not verified yet!');
         _;
     }
 
@@ -63,13 +74,12 @@ contract FitchainModel is FitchainStake {
 
     function createModel(bytes32 modelId, bytes32 paymentRecieptId, uint256 m, uint256 n) public notExist(modelId) returns(bool) {
         if(super.stake(modelId, msg.sender, minStake)){
-            models[modelId] = Model(true, false, false, 0,
+            models[modelId] = Model(true, false, false, 0,n, 0,
                                     msg.sender, bytes32(0),
                                     paymentRecieptId, bytes32(0),
-                                    bytes32(0), new bytes(0),
+                                    new bytes32[](0), new bytes(0),
                                     new string(0));
             // start goisspers channel
-            // bytes32 channelId, uint256 KGossipers, uint256 mOfN, address owner
             gossipersPool.initChannel(modelId, n, m, address(this));
             emit ModelCreated(modelId, msg.sender, true);
             return true;
@@ -88,21 +98,50 @@ contract FitchainModel is FitchainStake {
         return true;
     }
 
-    function releaseStake(bytes32 modelId) public onlyValidatedModel(modelId) returns(bool) {
+    function verifyModel(bytes32 modelId, bytes32 challengId, uint256 kVerifiers, uint256 wallTime, bytes32 testingData) public onlyValidatedModel(modelId) onlyModelOwner(modelId) returns(bool){
+        models[modelId].kVerifiers = kVerifiers;
+        //init verification pool
+        verifiersPool.initChallenge(modelId, address(this), challengId, wallTime, kVerifiers, testingData);
+    }
+
+    function releaseStake(bytes32 modelId) public onlyVerifiedModel(modelId) returns(bool) {
         super.release(modelId, models[modelId].owner, minStake);
         emit StakeReleased(modelId, models[modelId].owner, minStake);
         return true;
     }
 
-    function isModelValidated(bytes32 modelId) public view returns(bool){
-        return (models[modelId].isTrained && models[modelId].isVerfied);
+    function isModelValidated(bytes32 modelId) public view onlyExist(modelId) returns(bool){
+        return models[modelId].isTrained;
     }
 
-    function setModelTrained(bytes32 modelId) public onlyValidatedModel(modelId) returns(bool) {
+    function isModelVerified(bytes32 modelId) public view onlyExist(modelId) returns(bool){
+         return models[modelId].isVerfied;
+    }
+
+    function getModelKVerifiersCount(bytes32 modelId) public view onlyExist(modelId) returns(uint256){
+        return models[modelId].kVerifiers;
+    }
+
+    function getModelKGossipersCount(bytes32 modelId) public view onlyExist(modelId) returns(uint256){
+        return models[modelId].kGossipers;
+    }
+
+    function getModelChallengeCount(bytes32 modelId) public view onlyExist(modelId) returns(uint256){
+        return models[modelId].verifiersPoolIds.length;
+    }
+
+    function setModelTrained(bytes32 modelId) public returns(bool) {
         bytes32 proofId = gossipersPool.getProofIdByChannelId(modelId);
         require(gossipersPool.isValidProof(proofId), 'Proof is not valid');
         // terminate channel
         gossipersPool.terminateChannel(modelId);
         models[modelId].isTrained = true;
+    }
+
+    function setModelVerified(bytes32 modelId) public onlyValidatedModel(modelId) {
+        for (uint256 i=0; i < models[modelId].verifiersPoolIds.length; i++){
+            require(verifiersPool.isVerifiedProof(models[modelId].verifiersPoolIds[i]), 'invalid proof verification');
+        }
+        models[modelId].isVerfied = true;
     }
 }
