@@ -108,7 +108,7 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
         challenges[challengeId].canCommit +=1;
         if (challenges[challengeId].canCommit == challenges[challengeId].verifiers.length){
             emit CommitPhaseStarted(challengeId, challenges[challengeId].verifiers);
-            super.setup(challengeId, VPCsettings[address(this)].commitTimeout, VPCsettings[address(this)].revealTimeout, challenges[challengeId].verifiers);
+            CommitReveal.setup(challengeId, VPCsettings[address(this)].commitTimeout, VPCsettings[address(this)].revealTimeout, challenges[challengeId].verifiers);
         }
     }
 
