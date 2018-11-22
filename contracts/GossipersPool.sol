@@ -2,14 +2,13 @@ pragma solidity ^0.4.25;
 
 import 'openzeppelin-solidity/contracts/cryptography/ECDSA.sol';
 import './FitchainRegistry.sol';
-import './FitchainHelper.sol';
 
 /**
 @title Fitchain Gossipers Pool Contract
 @author Team: Fitchain Team
 */
 
-contract GossipersPool is FitchainHelper, FitchainRegistry {
+contract GossipersPool is FitchainRegistry {
 
     // lighting channels
     struct Channel {
@@ -22,7 +21,7 @@ contract GossipersPool is FitchainHelper, FitchainRegistry {
     // proof of training
     struct Proof {
         bool isVerified;
-        uint256 MofNSigs; // M of (N=channel[channelId].verifers.length) verified signatures for the same proof
+        uint256 MofNSigs;
         bytes32 channelId;
         bytes32[] results;
         bytes32[] proofHashs;
@@ -100,7 +99,6 @@ contract GossipersPool is FitchainHelper, FitchainRegistry {
         address [] memory gossipersSet = getAvailableGossipers();
         for(uint256 i=0; i< K; i++){
             channels[channelId].gossipers.push(gossipersSet[i]);
-            // TODO: decrease the number of the available slots for the gossiper
             super.decrementActorSlots(gossipersSet[i]);
         }
         return channels[channelId].gossipers.length;
@@ -181,5 +179,9 @@ contract GossipersPool is FitchainHelper, FitchainRegistry {
             return true;
         }
         return false;
+    }
+
+    function getChannelOwner(bytes32 channelId) public view returns(address) {
+        return channels[channelId].owner;
     }
 }
