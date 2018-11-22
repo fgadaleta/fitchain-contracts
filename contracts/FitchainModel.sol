@@ -105,7 +105,7 @@ contract FitchainModel is FitchainStake {
         verifiersPool.initChallenge(modelId, challengId, wallTime, kVerifiers, testingData);
     }
 
-    function releaseStake(bytes32 modelId) public onlyVerifiedModel(modelId) returns(bool) {
+    function releaseModelStake(bytes32 modelId) public onlyVerifiedModel(modelId) returns(bool) {
         super.release(modelId, models[modelId].owner, minStake);
         emit StakeReleased(modelId, models[modelId].owner, minStake);
         return true;
@@ -140,7 +140,8 @@ contract FitchainModel is FitchainStake {
     }
 
     function setModelVerified(bytes32 modelId) public onlyValidatedModel(modelId) {
-
+        verifiersPool.endOfCommitRevealPhase(modelId);
+        // need to slash or take actions based onf commit reveal phase
         for (uint256 i=0; i < models[modelId].verifiersPoolIds.length; i++){
             require(verifiersPool.getChallengeOwner(models[modelId].verifiersPoolIds[i]) == address(this), 'invalid challenge owner');
             require(verifiersPool.isVerifiedProof(models[modelId].verifiersPoolIds[i]), 'invalid proof verification');

@@ -112,6 +112,13 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
         }
     }
 
+    function endOfCommitRevealPhase(bytes32 challengeId) public returns(address[] winners, address[] losers, int8 state){
+        if (CommitReveal.isCommitmentTimedout(challengeId)){
+            return CommitReveal.getCommitmentResult(challengeId, challenges[challengeId].verifiers);
+        }
+        return (winners, losers, -2);
+    }
+
     function getAvailableVerifiers() private view returns(address[]){
         return super.getAvaliableRegistrants();
     }
