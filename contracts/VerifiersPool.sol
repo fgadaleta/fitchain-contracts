@@ -55,6 +55,11 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
         _;
     }
 
+    modifier onlyChallengeOwner(bytes32 challengeId){
+        require(address(this) == challenges[challengeId].owner, 'invalid challenge owner');
+        _;
+    }
+
     modifier onlyValidStake(uint256 amount){
         require(amount >= VPCsettings[address(this)].minStake);
         _;
@@ -85,8 +90,7 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
         VPCsettings[address(this)] = VPCSetting(_minKVerifiers, _minStake, _commitTimeout, _revealTimeout);
     }
 
-    function initChallenge(bytes32 modelId, bytes32 challengeId, uint256 wallTime,
-                          uint256 kVerifiers, bytes32 testingData) public onlyNotExistChallenge(challengeId) returns(bool){
+    function initChallenge(bytes32 modelId, bytes32 challengeId, uint256 wallTime, uint256 kVerifiers, bytes32 testingData) public onlyNotExistChallenge(challengeId) returns(bool){
         require(wallTime > 20, 'invalid wallTime, should be at least greater than average block interval');
         address[] memory verifiers = getAvailableVerifiers();
         if(verifiers.length >= kVerifiers){
@@ -112,11 +116,12 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
         }
     }
 
-    function endOfCommitRevealPhase(bytes32 challengeId) public returns(address[] winners, address[] losers, int8 state){
+    function endOfCommitRevealPhase(bytes32 challengeId) public returns(address[] losers, int8 state){
         if (CommitReveal.isCommitmentTimedout(challengeId)){
             return CommitReveal.getCommitmentResult(challengeId, challenges[challengeId].verifiers);
         }
-        return (winners, losers, -2);
+        // -1 indicate the challenge still not timed-out.
+        return (losers, -1);
     }
 
     function getAvailableVerifiers() private view returns(address[]){
@@ -131,8 +136,12 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
         return super.deregister(actor, keccak256(abi.encodePacked(address(this))));
     }
 
+    function slashVerifier(bytes32 challengeId, address actor) public onlyChallengeOwner(challengeId) returns(bool){
+        return super.slashActor(keccak256(abi.encodePacked(address(this))), actor, VPCsettings[address(this)].minStake, true);
+    }
+
     function getKVerifiers(bytes32 challengeId, uint256 K) private returns(uint256){
-        address [] memory verifiersSet = getAvailableVerifiers();
+        address[] memory verifiersSet = getAvailableVerifiers();
         for(uint256 i=0; i< K; i++){
             challenges[challengeId].verifiers.push(verifiersSet[i]);
             super.decrementActorSlots(verifiersSet[i]);
@@ -147,4 +156,5 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
     function getChallengeOwner(bytes32 challengeId) public view onlyExistChallenge(challengeId) returns(address){
         return challenges[challengeId].owner;
     }
+
 }

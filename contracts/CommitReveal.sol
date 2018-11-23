@@ -22,8 +22,7 @@ contract CommitReveal {
     }
 
     struct Result{
-        int8 state;
-        address[] winners;
+        bool state;
         address[] losers;
     }
 
@@ -74,46 +73,42 @@ contract CommitReveal {
         return true;
     }
 
-    function getCommitmentResult(bytes32 _commitmentId, address[] verifiers) internal onlyAfterReveal(_commitmentId) returns(address[], address[], int8){
+    function getCommitmentResult(bytes32 _commitmentId, address[] verifiers) internal onlyAfterReveal(_commitmentId) returns(address[], int8){
+        uint256 votingUp = 0;
+        uint256 votingDown = 0;
         for(uint256 i=0; i < verifiers.length; i++){
-            // cheating verifier (inconsistent commitment)
-            if(commitments[_commitmentId][verifiers[i]].hash != keccak256(abi.encodePacked(commitments[_commitmentId][verifiers[i]].value))) results[_commitmentId].losers.push(verifiers[i]);
+            // (inconsistent commitment)
+            if(commitments[_commitmentId][verifiers[i]].hash != keccak256(abi.encodePacked(commitments[_commitmentId][verifiers[i]].value)))
+            results[_commitmentId].losers.push(verifiers[i]);
             else{
                 if(verifiers.length >=2 && i < verifiers.length-1){
-                    if(commitments[_commitmentId][verifiers[i]].vote == commitments[_commitmentId][verifiers[i+1]].vote && commitments[_commitmentId][verifiers[i]].hash == commitments[_commitmentId][verifiers[i+1]].hash){
+                    if(commitments[_commitmentId][verifiers[i]].vote == commitments[_commitmentId][verifiers[i+1]].vote &&
+                    commitments[_commitmentId][verifiers[i]].hash == commitments[_commitmentId][verifiers[i+1]].hash){
                         if(commitments[_commitmentId][verifiers[i]].vote){
-                            results[_commitmentId].winners.push(verifiers[i]);
-                            results[_commitmentId].winners.push(verifiers[i+1]);
+                            votingUp +=2;
+                            i++;
                         }else{
-                            results[_commitmentId].losers.push(verifiers[i]);
-                            results[_commitmentId].losers.push(verifiers[i+1]);
+                            votingDown +=2;
+                            i++;
                         }
                     }else{
                         if(commitments[_commitmentId][verifiers[i]].vote){
-                            results[_commitmentId].winners.push(verifiers[i]);
-                            results[_commitmentId].losers.push(verifiers[i+1]);
+                            votingUp +=1;
                         }else{
-                            results[_commitmentId].winners.push(verifiers[i+1]);
-                            results[_commitmentId].losers.push(verifiers[i]);
+                            votingDown +=1;
                         }
                     }
                 }
             }
         }
-        // 1st array is winners, 2nd is losers (even if the names is different use the index)
-        if(results[_commitmentId].winners.length > results[_commitmentId].losers.length) {
-            results[_commitmentId].state = 1;
+        if(votingUp > votingDown) {
+            results[_commitmentId].state = true;
             // slash losers
-            return (results[_commitmentId].winners, results[_commitmentId].losers, 1);
+            return (results[_commitmentId].losers, 1);
         }
-        else if(results[_commitmentId].winners.length < results[_commitmentId].losers.length){
-            results[_commitmentId].state = 0;
-            // slash data provider
-            return (results[_commitmentId].losers, results[_commitmentId].winners, 0);
-        }
-        results[_commitmentId].state = -1;
-        // unknown state
-        return (results[_commitmentId].winners, results[_commitmentId].losers, -1);
+        results[_commitmentId].state = false;
+        // slash data provider and losers (2nd item in the tuple winners)
+        return (results[_commitmentId].losers, 0);
     }
 
     function isCommitmentTimedout(bytes32 _commitmentId) public view returns(bool){

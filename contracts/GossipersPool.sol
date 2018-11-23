@@ -96,7 +96,7 @@ contract GossipersPool is FitchainRegistry {
     }
 
     function getKGossipers(bytes32 channelId, uint256 K) private returns(uint256){
-        address [] memory gossipersSet = getAvailableGossipers();
+        address[] memory gossipersSet = getAvailableGossipers();
         for(uint256 i=0; i< K; i++){
             channels[channelId].gossipers.push(gossipersSet[i]);
             super.decrementActorSlots(gossipersSet[i]);
@@ -150,11 +150,11 @@ contract GossipersPool is FitchainRegistry {
     function submitProof(bytes32 channelId, string eot, bytes32[] merkleroot, bytes signature, bytes32 result) public canVerify(channelId) returns(bool) {
         bytes32 prefixedHash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(channelId, merkleroot, eot, result)));
         if(isValidSignature(prefixedHash, signature, msg.sender)){
-                proofs[channels[channelId].proof].signatures.push(signature);
-                proofs[channels[channelId].proof].proofHashs.push(prefixedHash);
-                proofs[channels[channelId].proof].results.push(result);
-                emit PoTSubmitted(channelId, channels[channelId].proof, msg.sender, prefixedHash);
-                return true;
+            proofs[channels[channelId].proof].signatures.push(signature);
+            proofs[channels[channelId].proof].proofHashs.push(prefixedHash);
+            proofs[channels[channelId].proof].results.push(result);
+            emit PoTSubmitted(channelId, channels[channelId].proof, msg.sender, prefixedHash);
+            return true;
         }
         return false;
     }

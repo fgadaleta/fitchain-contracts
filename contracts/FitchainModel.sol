@@ -15,7 +15,7 @@ contract FitchainModel is FitchainStake {
     struct Model {
         bool exist;
         bool isTrained;
-        bool isVerfied;
+        bool isVerified;
         uint256 kGossipers;
         uint256 kVerifiers;
         uint256 format;
@@ -62,7 +62,7 @@ contract FitchainModel is FitchainStake {
     }
 
     modifier onlyVerifiedModel(bytes32 modelId){
-        require(models[modelId].isVerfied, 'Model is not verified yet!');
+        require(models[modelId].isVerified, 'Model is not verified yet!');
         _;
     }
 
@@ -75,11 +75,7 @@ contract FitchainModel is FitchainStake {
 
     function createModel(bytes32 modelId, bytes32 paymentRecieptId, uint256 m, uint256 n) public notExist(modelId) returns(bool) {
         if(super.stake(modelId, msg.sender, minStake)){
-            models[modelId] = Model(true, false, false, 0,n, 0,
-                                    msg.sender, bytes32(0),
-                                    paymentRecieptId, bytes32(0),
-                                    new bytes32[](0), new bytes(0),
-                                    new string(0));
+            models[modelId] = Model(true, false, false, 0,n, 0, msg.sender, bytes32(0), paymentRecieptId, bytes32(0), new bytes32[](0), new bytes(0), new string(0));
             // start goisspers channel
             gossipersPool.initChannel(modelId, n, m, address(this));
             emit ModelCreated(modelId, msg.sender, true);
@@ -116,7 +112,7 @@ contract FitchainModel is FitchainStake {
     }
 
     function isModelVerified(bytes32 modelId) public view onlyExist(modelId) returns(bool){
-         return models[modelId].isVerfied;
+        return models[modelId].isVerified;
     }
 
     function getModelKVerifiersCount(bytes32 modelId) public view onlyExist(modelId) returns(uint256){
@@ -134,19 +130,31 @@ contract FitchainModel is FitchainStake {
     function setModelTrained(bytes32 modelId) public returns(bool) {
         bytes32 proofId = gossipersPool.getProofIdByChannelId(modelId);
         require(gossipersPool.isValidProof(proofId), 'Proof is not valid');
-        // terminate channel
         gossipersPool.terminateChannel(modelId);
         models[modelId].isTrained = true;
     }
 
     function setModelVerified(bytes32 modelId) public onlyValidatedModel(modelId) {
-        verifiersPool.endOfCommitRevealPhase(modelId);
-        // need to slash or take actions based onf commit reveal phase
         for (uint256 i=0; i < models[modelId].verifiersPoolIds.length; i++){
+            (address[] memory losers, int8 state) = verifiersPool.endOfCommitRevealPhase(models[modelId].verifiersPoolIds[i]);
+            // need to slash or take actions based on the revealed commits
+            if(state == -1){
+                models[modelId].isVerified = false;
+                // emit event indicating commitment did NOT timedout!
+            }
+            if(state == 0){
+                // slash Data-compute provider
+                super.slash(modelId, models[modelId].owner, minStake);
+                for(uint256 j=0; j < losers.length; j++){
+                    //slash verifiers (losers only)
+                    verifiersPool.slashVerifier(models[modelId].verifiersPoolIds[i], losers[j]);
+                    //TODO: redistribute slashed amount as a reward
+                }
+            }
             require(verifiersPool.getChallengeOwner(models[modelId].verifiersPoolIds[i]) == address(this), 'invalid challenge owner');
             require(verifiersPool.isVerifiedProof(models[modelId].verifiersPoolIds[i]), 'invalid proof verification');
         }
-        models[modelId].isVerfied = true;
+        models[modelId].isVerified = true;
     }
 
 }
