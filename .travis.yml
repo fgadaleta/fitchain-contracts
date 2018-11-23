@@ -25,7 +25,8 @@ matrix:
 
 before_install:
 - npm install -g npm
-- npm install -g ganache-cli@~6.1.8 har-validator release-it eslint-plugin-security@latest eslint-config-standard
+- npm install -g ganache-cli@~6.1.6 har-validator release-it
+- npm install -9 eslint-plugin-import eslint-plugin-security
 
 before_script:
 - ganache-cli > ganache-cli.log &
