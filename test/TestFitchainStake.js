@@ -23,7 +23,10 @@ contract('FitchainStake', (accounts) => {
             await token.approve(staking.address, 1000, {from: tokenOwner})
             await staking.stake(utils.soliditySha3(['string'],['generateRandomStakeId']), 1000, {from: tokenOwner})
             // check that the balance of the staking contract address has received the same value
+            const stakeByActor = await staking.getStakebyActor(utils.soliditySha3(['string'],['generateRandomStakeId']), tokenOwner)
             assert.strictEqual(1000, web3.utils.toDecimal(await token.balanceOf(staking.address)), 'unable to stake!')
+            assert.strictEqual(stakeByActor.toNumber(), web3.utils.toDecimal(await token.balanceOf(staking.address)), 'invalid stake number')
+
         })
     })
 })
