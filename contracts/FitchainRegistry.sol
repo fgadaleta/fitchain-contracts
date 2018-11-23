@@ -57,7 +57,7 @@ contract FitchainRegistry is Ownable {
         return staking.release(stakeId, actor, amount);
     }
 
-    function slashActor(bytes32 stakeId, address actor, uint256 amount, bool decrementSlots) internal onlyNotExist(actor) returns(bool){
+    function slashActor(bytes32 stakeId, address actor, uint256 amount, bool decrementSlots) public onlyRegistryOwner(actor) onlyNotExist(actor) returns(bool){
          require(staking.slash(stakeId, actor, amount), 'unable to slash the actor');
          if(decrementSlots)
             decrementActorSlots(actor);
@@ -94,7 +94,7 @@ contract FitchainRegistry is Ownable {
         return actors;
     }
 
-    function decrementActorSlots(address actor) internal returns(bool){
+    function decrementActorSlots(address actor) public onlyRegistryOwner(actor) returns(bool){
         require(registrants[actor].slots > 0, 'invalid slots value');
         registrants[actor].slots -=1;
         if(registrants[actor].slots == 0){
@@ -103,7 +103,7 @@ contract FitchainRegistry is Ownable {
         return true;
     }
 
-    function incrementActorSlots(address actor) internal returns(bool){
+    function incrementActorSlots(address actor) public onlyRegistryOwner(actor) returns(bool){
         require(registrants[actor].slots >=0, 'invalid slots value');
         if(registrants[actor].slots == 0){
             addActorToRegistry(actor);

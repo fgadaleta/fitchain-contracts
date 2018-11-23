@@ -1,0 +1,41 @@
+language: node_js
+
+node_js:
+- "10"
+
+python:
+- "3.6"
+
+services:
+- docker
+
+sudo: required
+
+cache:
+    directories:
+    - node_modules
+
+env:
+- DEPLOY_PACKAGE=true
+- SOLIDITY_COVERAGE=true
+- SOLC_NIGHTLY=true
+
+matrix:
+    fast_finish: true
+    allow_failures:
+    - env: SOLIDITY_COVERAGE=true
+    - env: SOLC_NIGHTLY=true
+
+before_install:
+- npm install -g npm
+- npm install -g ganache-cli@~6.1.8 release-it
+
+before_script:
+- ganache-cli > ganache-cli.log &
+
+script:
+- npm run lint
+- npm run test:cover
+- npm run migrate
+- git status
+- git add package-lock.json
