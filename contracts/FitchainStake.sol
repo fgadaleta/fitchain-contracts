@@ -6,7 +6,7 @@ import './FitchainToken.sol';
 @author Team: Fitchain Team
 */
 
-contract FitchainStake is FitchainToken {
+contract FitchainStake {
 
     struct Stake{
         address owner;
@@ -64,8 +64,8 @@ contract FitchainStake is FitchainToken {
 
     function release(bytes32 stakeId, address actor, uint256 amount) public onlyStakeOwner(stakeId) returns(bool){
         require(stakes[stakeId].actors[actor] >= amount, 'invalid release token amount');
+        require(token.transfer(actor, amount), 'unable to transfer token to the actor!');
         stakes[stakeId].actors[actor] -= amount;
-        token.transfer(actor, amount);
         return true;
     }
 }
