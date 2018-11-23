@@ -25,7 +25,7 @@ matrix:
 
 before_install:
 - npm install -g npm
-- npm install -g ganache-cli@~6.1.8 release-it
+- npm install -g ganache-cli@~6.1.8 har-validator release-it
 - npm install .
 
 before_script:
