@@ -8,7 +8,7 @@ import './FitchainStake.sol';
 @author Team: Fitchain Team
 */
 
-contract FitchainRegistry is Ownable, FitchainStake {
+contract FitchainRegistry is Ownable {
 
     struct Registrant {
         bool exists;
@@ -18,6 +18,7 @@ contract FitchainRegistry is Ownable, FitchainStake {
 
     mapping(address => Registrant) registrants;
     address[] actors;
+    FitchainStake private staking;
 
 
     modifier onlyFreeSlots(address actor){
@@ -30,24 +31,29 @@ contract FitchainRegistry is Ownable, FitchainStake {
         _;
     }
 
+    constructor(address _stakeAddress) public {
+        require(_stakeAddress != address(0), 'invalid address');
+        staking = FitchainStake(_stakeAddress);
+    }
+
     function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) internal onlyNotExist(actor) returns(bool) {
         require(slots >= 1, 'invalid number of free slots');
         registrants[actor] = Registrant(true, slots, slots);
-        stake(stakeId, actor, slots * amount);
+        staking.stake(stakeId, actor, slots * amount);
         addActorToRegistry(actor);
         return true;
     }
 
     function deregister(address actor, bytes32 stakeId) internal onlyFreeSlots(actor) returns (bool) {
-        uint256 amount = getStakebyActor(stakeId, actor);
+        uint256 amount = staking.getStakebyActor(stakeId, actor);
         require(amount > 0, 'indicating empty stake!');
         registrants[actor].exists = false;
         removeActorFromRegistry(actor);
-        return release(stakeId, actor, amount);
+        return staking.release(stakeId, actor, amount);
     }
 
     function slashActor(bytes32 stakeId, address actor, uint256 amount, bool decrementSlots) internal onlyNotExist(actor) returns(bool){
-         require(slash(stakeId, actor, amount), 'unable to slash the actor');
+         require(staking.slash(stakeId, actor, amount), 'unable to slash the actor');
          if(decrementSlots)
             decrementActorSlots(actor);
          return true;
