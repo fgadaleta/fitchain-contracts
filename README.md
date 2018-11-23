@@ -1,5 +1,7 @@
 # Fitchain contracts
 
+![Fitchain Travis](https://travis-ci.com/aabdulwahed/fitchain-contracts.svg?branch=master)
+
 Implementation of the fitchain registry and Validator Pool Contract (VPC) for the Ethereum blockchain.
 The two contracts hereby implemented are 
 
