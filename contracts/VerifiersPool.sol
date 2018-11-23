@@ -90,8 +90,7 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
         VPCsettings[address(this)] = VPCSetting(_minKVerifiers, _minStake, _commitTimeout, _revealTimeout);
     }
 
-    function initChallenge(bytes32 modelId, bytes32 challengeId, uint256 wallTime,
-                          uint256 kVerifiers, bytes32 testingData) public onlyNotExistChallenge(challengeId) returns(bool){
+    function initChallenge(bytes32 modelId, bytes32 challengeId, uint256 wallTime, uint256 kVerifiers, bytes32 testingData) public onlyNotExistChallenge(challengeId) returns(bool){
         require(wallTime > 20, 'invalid wallTime, should be at least greater than average block interval');
         address[] memory verifiers = getAvailableVerifiers();
         if(verifiers.length >= kVerifiers){
@@ -142,7 +141,7 @@ contract VerifiersPool is FitchainHelper, CommitReveal, FitchainRegistry  {
     }
 
     function getKVerifiers(bytes32 challengeId, uint256 K) private returns(uint256){
-        address [] memory verifiersSet = getAvailableVerifiers();
+        address[] memory verifiersSet = getAvailableVerifiers();
         for(uint256 i=0; i< K; i++){
             challenges[challengeId].verifiers.push(verifiersSet[i]);
             super.decrementActorSlots(verifiersSet[i]);

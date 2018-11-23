@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 /* eslint-disable no-console */
-/* global assert */
+/* global */
 const Web3 = require('web3')
 const abi = require('ethereumjs-abi')
 
@@ -11,6 +11,6 @@ const utils = {
     },
     soliditySha3: (types, values) => {
         return '0x' + abi.soliditySHA3(types, values).toString('hex')
-    },
+    }
 }
 module.exports = utils

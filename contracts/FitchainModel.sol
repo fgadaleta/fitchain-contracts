@@ -75,11 +75,7 @@ contract FitchainModel is FitchainStake {
 
     function createModel(bytes32 modelId, bytes32 paymentRecieptId, uint256 m, uint256 n) public notExist(modelId) returns(bool) {
         if(super.stake(modelId, msg.sender, minStake)){
-            models[modelId] = Model(true, false, false, 0,n, 0,
-                                    msg.sender, bytes32(0),
-                                    paymentRecieptId, bytes32(0),
-                                    new bytes32[](0), new bytes(0),
-                                    new string(0));
+            models[modelId] = Model(true, false, false, 0,n, 0, msg.sender, bytes32(0), paymentRecieptId, bytes32(0), new bytes32[](0), new bytes(0), new string(0));
             // start goisspers channel
             gossipersPool.initChannel(modelId, n, m, address(this));
             emit ModelCreated(modelId, msg.sender, true);
@@ -116,7 +112,7 @@ contract FitchainModel is FitchainStake {
     }
 
     function isModelVerified(bytes32 modelId) public view onlyExist(modelId) returns(bool){
-         return models[modelId].isVerified;
+        return models[modelId].isVerified;
     }
 
     function getModelKVerifiersCount(bytes32 modelId) public view onlyExist(modelId) returns(uint256){

@@ -58,10 +58,9 @@ contract FitchainRegistry is Ownable {
     }
 
     function slashActor(bytes32 stakeId, address actor, uint256 amount, bool decrementSlots) public onlyRegistryOwner(actor) onlyNotExist(actor) returns(bool){
-         require(staking.slash(stakeId, actor, amount), 'unable to slash the actor');
-         if(decrementSlots)
-            decrementActorSlots(actor);
-         return true;
+        require(staking.slash(stakeId, actor, amount), 'unable to slash the actor');
+        if(decrementSlots) decrementActorSlots(actor);
+        return true;
     }
 
     function isActorRegistered(address actor) public view returns(bool) {
