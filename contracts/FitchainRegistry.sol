@@ -14,12 +14,17 @@ contract FitchainRegistry is Ownable {
         bool exists;
         uint256 slots;
         uint256 maxSlots;
+        address registryOwner;
     }
 
     mapping(address => Registrant) registrants;
     address[] actors;
     FitchainStake private staking;
 
+    modifier onlyRegistryOwner(address registrant){
+        require(registrants[registrant].registryOwner == msg.sender, 'invalid registry owner');
+        _;
+    }
 
     modifier onlyFreeSlots(address actor){
         require(registrants[actor].slots == registrants[actor].maxSlots, 'registrant is busy, please free slots!');
@@ -36,15 +41,15 @@ contract FitchainRegistry is Ownable {
         staking = FitchainStake(_stakeAddress);
     }
 
-    function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) internal onlyNotExist(actor) returns(bool) {
+    function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) public onlyRegistryOwner(actor) onlyNotExist(actor) returns(bool) {
         require(slots >= 1, 'invalid number of free slots');
-        registrants[actor] = Registrant(true, slots, slots);
-        staking.stake(stakeId, actor, slots * amount);
+        require(staking.stake(stakeId, actor, slots * amount));
+        registrants[actor] = Registrant(true, slots, slots, msg.sender);
         addActorToRegistry(actor);
         return true;
     }
 
-    function deregister(address actor, bytes32 stakeId) internal onlyFreeSlots(actor) returns (bool) {
+    function deregister(address actor, bytes32 stakeId) public onlyRegistryOwner(actor) onlyFreeSlots(actor) returns (bool) {
         uint256 amount = staking.getStakebyActor(stakeId, actor);
         require(amount > 0, 'indicating empty stake!');
         registrants[actor].exists = false;
