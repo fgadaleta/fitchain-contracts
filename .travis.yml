@@ -1,10 +1,7 @@
 language: node_js
 
 node_js:
-- "10"
-
-python:
-- "3.6"
+- "9"
 
 services:
 - docker
@@ -28,7 +25,7 @@ matrix:
 
 before_install:
 - npm install -g npm
-- npm install -g ci ganache-cli@~6.1.8 release-it
+- npm install -g ganache-cli@~6.1.8 release-it
 
 before_script:
 - ganache-cli > ganache-cli.log &
