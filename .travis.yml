@@ -13,7 +13,7 @@ cache:
     - node_modules
 
 env:
-- DEPLOY_PACKAGE=true
+- DEPLOY_PACKAGE=false
 - SOLIDITY_COVERAGE=true
 - SOLC_NIGHTLY=true
 
@@ -32,8 +32,6 @@ before_script:
 - ganache-cli > ganache-cli.log &
 
 script:
-- npm run lint
+- npm run lint:solium
 - npm run test
 - npm run migrate
-- git status
-- git add package-lock.json
