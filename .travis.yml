@@ -8,9 +8,9 @@ services:
 
 sudo: required
 
-#cache:
-#    directories:
-#    - node_modules
+cache:
+    directories:
+    - node_modules
 
 env:
 - DEPLOY_PACKAGE=true
@@ -26,6 +26,7 @@ matrix:
 before_install:
 - npm install -g npm
 - npm install -g ganache-cli@~6.1.8 release-it
+- npm install .
 
 before_script:
 - ganache-cli > ganache-cli.log &
