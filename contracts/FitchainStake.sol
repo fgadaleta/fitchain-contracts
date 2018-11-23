@@ -13,19 +13,30 @@ contract FitchainStake is FitchainToken {
     }
 
     mapping(bytes32 => Stake) stakes;
+    FitchainToken private token;
+
+    event Staking(address sender, address receiver, uint256 amount, bool state);
+
+    constructor(address _tokenAddress) public {
+        require(_tokenAddress != address(0), 'Invalid address');
+        token = FitchainToken(_tokenAddress);
+    }
 
     function stake(bytes32 stakeId, uint256 amount) public returns(bool){
-        require(super.balanceOf(msg.sender) > amount, 'insufficient fund');
-        if(super.transferFrom(msg.sender, address(this), amount)){
+        token.allowance(msg.sender, address(this));
+        if(token.transferFrom(msg.sender, address(this), amount)){
             stakes[stakeId].actors[msg.sender] += amount;
+            emit Staking(msg.sender, address(this), amount, true);
             return true;
         }
+        emit Staking(msg.sender, address(this), amount, false);
         return false;
     }
 
     function stake(bytes32 stakeId, address actor, uint256 amount) internal returns(bool){
-        require(super.balanceOf(actor) > amount, 'insufficient fund');
-        if(super.transferFrom(actor, address(this), amount)){
+        token.allowance(msg.sender, address(this));
+        require(token.balanceOf(actor) >= amount, 'insufficient fund');
+        if(token.transferFrom(actor, address(this), amount)){
             stakes[stakeId].actors[actor] += amount;
             return true;
         }
@@ -46,7 +57,7 @@ contract FitchainStake is FitchainToken {
     function release(bytes32 stakeId, address actor, uint256 amount) internal returns(bool){
         require(stakes[stakeId].actors[actor] >= amount, 'invalid release token amount');
         stakes[stakeId].actors[actor] -= amount;
-        super.transfer(actor, amount);
+        token.transfer(actor, amount);
         return true;
     }
 }
