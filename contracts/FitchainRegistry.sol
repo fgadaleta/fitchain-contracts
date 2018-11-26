@@ -41,7 +41,7 @@ contract FitchainRegistry is Ownable {
         staking = FitchainStake(_stakeAddress);
     }
 
-    function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) public onlyRegistryOwner(actor) onlyNotExist(actor) returns(bool) {
+    function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) public onlyNotExist(actor) returns(bool) {
         require(slots >= 1, 'invalid number of free slots');
         require(staking.stake(stakeId, actor, slots * amount));
         registrants[actor] = Registrant(true, slots, slots, msg.sender);
