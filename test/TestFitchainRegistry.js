@@ -43,10 +43,20 @@ contract('FitchainRegistry', (accounts) => {
             await token.approve(staking.address, (slots * amount), {from: registrant1Addr})
             await token.approve(staking.address, (slots * amount), {from: registrant2Addr})
             // call register
-            await registry.register(registrant1Addr, slots, stakeId, amount, {from: registrant1Addr})
-            await registry.register(registrant2Addr, slots, stakeId, amount, {from: registrant2Addr})
+            await registry.register(registrant1Addr, slots, stakeId, amount, {from: genesisAccount})
+            await registry.register(registrant2Addr, slots, stakeId, amount, {from: genesisAccount})
             assert.strictEqual(await registry.isActorRegistered(registrant1Addr), true, 'actor is not registered!')
             assert.strictEqual(await registry.isActorRegistered(registrant2Addr), true, 'actor is not registered!')
+        })
+        it('should be able to get the available registrants', async() => {
+            const actors = await registry.getAvaliableRegistrants()
+            assert.strictEqual(2, actors.length, 'invalid number of actors')
+        })
+        it('for each actor check assert the number of free slots', async() => {
+            const actor1Slots = await registry.getActorFreeSlots(registrant1Addr)
+            const actor2Slots = await registry.getActorFreeSlots(registrant2Addr)
+            assert.strictEqual(3, actor1Slots.toNumber(), 'invalid slots number')
+            assert.strictEqual(3, actor2Slots.toNumber(), 'invalid slots number')
         })
     })
 
