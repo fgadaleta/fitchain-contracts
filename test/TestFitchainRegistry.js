@@ -76,5 +76,12 @@ contract('FitchainRegistry', (accounts) => {
                 console.log(error)
             }
         })
+        it('slash the first registrant', async() => {
+            await registry.slashActor(stakeId, registrant1Addr, amount, true, { from: genesisAccount })
+            const actor1MaxSlots = await registry.getActorMaxSlots(registrant1Addr)
+            assert.strictEqual(2, actor1MaxSlots.toNumber(), 'invalid max number of slots')
+            const actor1Stake = await staking.getStakebyActor(stakeId, registrant1Addr)
+            assert.strictEqual(200, actor1Stake.toNumber(), 'invalid stake amount')
+        })
     })
 })
