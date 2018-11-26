@@ -5,11 +5,9 @@ const FitchainStake = artifacts.require('FitchainStake.sol')
 const Registry = artifacts.require('FitchainRegistry.sol')
 const utils = require('./utils.js')
 
-
 const web3 = utils.getWeb3()
 
 contract('FitchainRegistry', (accounts) => {
-
     describe('Test Fitchain Registry Contract', () => {
         let token
         let staking
@@ -28,8 +26,8 @@ contract('FitchainRegistry', (accounts) => {
             registry = await Registry.deployed()
 
             // registrant 1 & 2 buy tokens from genesis account
-            await token.transfer(registrant1Addr, (slots * amount) + 1, {from: genesisAccount})
-            await token.transfer(registrant2Addr, (slots * amount) + 1, {from: genesisAccount})
+            await token.transfer(registrant1Addr, (slots * amount) + 1, { from: genesisAccount })
+            await token.transfer(registrant2Addr, (slots * amount) + 1, { from: genesisAccount })
             totalSupply = await token.totalSupply()
             genesisBalance = web3.utils.toDecimal(await token.balanceOf(genesisAccount))
             stakeId = utils.soliditySha3(['address'], [registry.address])
@@ -38,47 +36,45 @@ contract('FitchainRegistry', (accounts) => {
             assert.strictEqual((slots * amount) + 1, web3.utils.toDecimal(await token.balanceOf(registrant2Addr)), 'invalid amount of tokens registrant 2')
         })
 
-        it('register an actor with as stake of 3 slots, 100 token per slot', async() => {
+        it('register an actor with as stake of 3 slots, 100 token per slot', async () => {
             // registrants approve the stake before registration
-            await token.approve(staking.address, (slots * amount), {from: registrant1Addr})
-            await token.approve(staking.address, (slots * amount), {from: registrant2Addr})
+            await token.approve(staking.address, (slots * amount), { from: registrant1Addr })
+            await token.approve(staking.address, (slots * amount), { from: registrant2Addr })
             // call register
-            await registry.register(registrant1Addr, slots, stakeId, amount, {from: genesisAccount})
-            await registry.register(registrant2Addr, slots, stakeId, amount, {from: genesisAccount})
+            await registry.register(registrant1Addr, slots, stakeId, amount, { from: genesisAccount })
+            await registry.register(registrant2Addr, slots, stakeId, amount, { from: genesisAccount })
             assert.strictEqual(await registry.isActorRegistered(registrant1Addr), true, 'actor is not registered!')
             assert.strictEqual(await registry.isActorRegistered(registrant2Addr), true, 'actor is not registered!')
         })
-        it('should be able to get the available registrants', async() => {
+        it('should be able to get the available registrants', async () => {
             const actors = await registry.getAvaliableRegistrants()
             assert.strictEqual(2, actors.length, 'invalid number of actors')
         })
-        it('for each actor check assert the number of free slots', async() => {
+        it('for each actor check assert the number of free slots', async () => {
             const actor1Slots = await registry.getActorFreeSlots(registrant1Addr)
             const actor2Slots = await registry.getActorFreeSlots(registrant2Addr)
             assert.strictEqual(3, actor1Slots.toNumber(), 'invalid slots number')
             assert.strictEqual(3, actor2Slots.toNumber(), 'invalid slots number')
         })
-        it('book 2 slots from each actor', async() => {
-            await registry.decrementActorSlots(registrant1Addr, {from: genesisAccount})
-            await registry.decrementActorSlots(registrant2Addr, {from: genesisAccount})
+        it('book 2 slots from each actor', async () => {
+            await registry.decrementActorSlots(registrant1Addr, { from: genesisAccount })
+            await registry.decrementActorSlots(registrant2Addr, { from: genesisAccount })
             const actor1Slots = await registry.getActorFreeSlots(registrant1Addr)
             const actor2Slots = await registry.getActorFreeSlots(registrant2Addr)
             assert.strictEqual(2, actor1Slots.toNumber(), 'invalid slots number')
             assert.strictEqual(2, actor2Slots.toNumber(), 'invalid slots number')
         })
-        it('should not be able to deregister, current slots < max slots', async() => {
-            try{
-                await registry.deregister(registrant1Addr, stakeId, {from: genesisAccount})
-            }catch(error){
+        it('should not be able to deregister, current slots < max slots', async () => {
+            try {
+                await registry.deregister(registrant1Addr, stakeId, { from: genesisAccount })
+            } catch (error) {
                 console.log(error)
             }
-            try{
-                await registry.deregister(registrant2Addr, stakeId, {from: genesisAccount})
-            }catch(error){
+            try {
+                await registry.deregister(registrant2Addr, stakeId, { from: genesisAccount })
+            } catch (error) {
                 console.log(error)
             }
-
         })
     })
-
 })
