@@ -145,4 +145,8 @@ contract CommitReveal {
     function getCommitTimeout(bytes32 _commitmentId) public view returns(uint256) {
         return settings[_commitmentId].commitTimeout;
     }
+
+    function canReveal(bytes32 _commitmentId) public view returns(bool) {
+        return (settings[_commitmentId].commitTimeout <= block.timestamp);
+    }
 }

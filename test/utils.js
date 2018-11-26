@@ -11,6 +11,9 @@ const utils = {
     },
     soliditySha3: (types, values) => {
         return '0x' + abi.soliditySHA3(types, values).toString('hex')
+    },
+    sleep: (millis) => {
+        return new Promise(resolve => setTimeout(resolve, millis))
     }
 }
 module.exports = utils
