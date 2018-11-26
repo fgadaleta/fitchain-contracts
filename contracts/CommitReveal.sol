@@ -16,6 +16,7 @@ contract CommitReveal {
     }
 
     struct Setting{
+        bool exist;
         uint256 commitTimeout;
         uint256 revealTimeout;
         address owner;
@@ -58,9 +59,14 @@ contract CommitReveal {
         _;
     }
 
-    function setup(bytes32 _commitmentId, uint256 _commitTimeout, uint256 _revealTimeout, address[] _voters) public returns(bool){
+    modifier onlyCommitmentNotExist(bytes32 commitmentId){
+        require(!settings[commitmentId].exist, 'Commitment already exists');
+        _;
+    }
+
+    function setup(bytes32 _commitmentId, uint256 _commitTimeout, uint256 _revealTimeout, address[] _voters) public onlyCommitmentNotExist(_commitmentId) returns(bool){
         require(_commitTimeout >= 20 && _revealTimeout >= 20, 'Indicating invalid commit timeout');
-        settings[_commitmentId] = Setting(_commitTimeout + block.timestamp, _commitTimeout + _revealTimeout + block.timestamp, msg.sender, _voters);
+        settings[_commitmentId] = Setting(true, _commitTimeout + block.timestamp, _commitTimeout + _revealTimeout + block.timestamp, msg.sender, _voters);
         commitmentsCount[_commitmentId] = 0;
         emit CommitmentInitialized(_commitmentId, _commitTimeout + block.timestamp,  _commitTimeout + _revealTimeout + block.timestamp, _voters);
         return true;

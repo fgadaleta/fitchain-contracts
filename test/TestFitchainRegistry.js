@@ -68,12 +68,12 @@ contract('FitchainRegistry', (accounts) => {
             try {
                 await registry.deregister(registrant1Addr, stakeId, { from: genesisAccount })
             } catch (error) {
-                console.log(error)
+                return error
             }
             try {
                 await registry.deregister(registrant2Addr, stakeId, { from: genesisAccount })
             } catch (error) {
-                console.log(error)
+                return error
             }
         })
         it('slash the first registrant', async () => {
