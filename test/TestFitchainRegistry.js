@@ -94,5 +94,9 @@ contract('FitchainRegistry', (accounts) => {
             assert.strictEqual(false, await registry.isActorRegistered(registrant1Addr), 'actor already exist')
             assert.strictEqual(false, await registry.isActorRegistered(registrant2Addr), 'actor already exist')
         })
+        it('assert the released stake of actors', async () => {
+            assert.strictEqual(201, web3.utils.toDecimal(await token.balanceOf(registrant1Addr)), 'invalid available tokens')
+            assert.strictEqual(301, web3.utils.toDecimal(await token.balanceOf(registrant2Addr)), 'invalid available tokens')
+        })
     })
 })
