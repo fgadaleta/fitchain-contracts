@@ -19,6 +19,7 @@ contract CommitReveal {
         uint256 commitTimeout;
         uint256 revealTimeout;
         address owner;
+        address[] voters;
     }
 
     struct Result{
@@ -43,16 +44,29 @@ contract CommitReveal {
         _;
     }
 
+    modifier onlyCommitmentVoters(bytes32 commitmentId) {
+        bool exists = false;
+        for(uint256 i=0; i < settings[commitmentId].voters.length; i++){
+            if(settings[commitmentId].voters[i] == msg.sender) exists = true;
+        }
+        require(exists, 'invalid voter address');
+        _;
+    }
 
-    function setup(bytes32 _commitmentId, uint256 _commitTimeout, uint256 _revealTimeout, address[] _voters) internal returns(bool){
+    modifier onlyCommitmentOwner(bytes32 commitmentId){
+        require(settings[commitmentId].owner == msg.sender, 'invalid commitment owner');
+        _;
+    }
+
+    function setup(bytes32 _commitmentId, uint256 _commitTimeout, uint256 _revealTimeout, address[] _voters) public returns(bool){
         require(_commitTimeout >= 20 && _revealTimeout >= 20, 'Indicating invalid commit timeout');
-        settings[_commitmentId] = Setting(_commitTimeout + block.timestamp, _commitTimeout + _revealTimeout + block.timestamp, msg.sender);
+        settings[_commitmentId] = Setting(_commitTimeout + block.timestamp, _commitTimeout + _revealTimeout + block.timestamp, msg.sender, _voters);
         commitmentsCount[_commitmentId] = 0;
         emit CommitmentInitialized(_commitmentId, _commitTimeout + block.timestamp,  _commitTimeout + _revealTimeout + block.timestamp, _voters);
         return true;
     }
 
-    function commit(bytes32 _commitmentId, bytes32 _hash) public returns(bool){
+    function commit(bytes32 _commitmentId, bytes32 _hash) public onlyCommitmentVoters(_commitmentId) returns(bool){
         require(!commitments[_commitmentId][msg.sender].exist, 'avoid replay attack');
         require(settings[_commitmentId].commitTimeout > block.timestamp, 'Invalid commit time');
         commitments[_commitmentId][msg.sender] = Commitment(true, false, false,_hash, new string(0));
@@ -60,7 +74,7 @@ contract CommitReveal {
         return true;
     }
 
-    function reveal(bytes32 _commitmentId, string _value, bool _vote) public returns(bool){
+    function reveal(bytes32 _commitmentId, string _value, bool _vote) public onlyCommitmentVoters(_commitmentId) returns(bool){
         if(settings[_commitmentId].revealTimeout >= block.timestamp) emit CommitmentTimedout(_commitmentId);
         require(commitments[_commitmentId][msg.sender].exist, 'Commitment is not exist!');
         require(!commitments[_commitmentId][msg.sender].isRevealed, 'Indicating replay attack');
@@ -73,7 +87,7 @@ contract CommitReveal {
         return true;
     }
 
-    function getCommitmentResult(bytes32 _commitmentId, address[] verifiers) internal onlyAfterReveal(_commitmentId) returns(address[], int8){
+    function getCommitmentResult(bytes32 _commitmentId, address[] verifiers) public onlyCommitmentOwner(_commitmentId) onlyAfterReveal(_commitmentId) returns(address[], int8){
         uint256 votingUp = 0;
         uint256 votingDown = 0;
         for(uint256 i=0; i < verifiers.length; i++){
