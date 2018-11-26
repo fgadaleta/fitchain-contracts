@@ -58,6 +58,27 @@ contract('FitchainRegistry', (accounts) => {
             assert.strictEqual(3, actor1Slots.toNumber(), 'invalid slots number')
             assert.strictEqual(3, actor2Slots.toNumber(), 'invalid slots number')
         })
+        it('book 2 slots from each actor', async() => {
+            await registry.decrementActorSlots(registrant1Addr, {from: genesisAccount})
+            await registry.decrementActorSlots(registrant2Addr, {from: genesisAccount})
+            const actor1Slots = await registry.getActorFreeSlots(registrant1Addr)
+            const actor2Slots = await registry.getActorFreeSlots(registrant2Addr)
+            assert.strictEqual(2, actor1Slots.toNumber(), 'invalid slots number')
+            assert.strictEqual(2, actor2Slots.toNumber(), 'invalid slots number')
+        })
+        it('should not be able to deregister, current slots < max slots', async() => {
+            try{
+                await registry.deregister(registrant1Addr, stakeId, {from: genesisAccount})
+            }catch(error){
+                console.log(error)
+            }
+            try{
+                await registry.deregister(registrant2Addr, stakeId, {from: genesisAccount})
+            }catch(error){
+                console.log(error)
+            }
+
+        })
     })
 
 })
