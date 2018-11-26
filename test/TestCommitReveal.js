@@ -50,13 +50,15 @@ contract('CommitReveal', (accounts) => {
         })
         it('reveal after 25 seconds timeout', async() => {
             const commitTime = await commitReveal.getCommitTimeout(commitmentId)
-            if(commitTime.toNumber() >= parseInt(Date.now()/1000)){
-                await utils.sleep(25000)
+            const revealTime = await commitReveal.getRevealTimeout(commitmentId)
+            const timestamp = parseInt(Date.now()/1000)
+            if((commitTime.toNumber() >= timestamp) && (timestamp < revealTime.toNumber())){
+                await utils.sleep(30000)
                 if(await commitReveal.canReveal(commitmentId)){
                     const revealed1stVote = await commitReveal.reveal(commitmentId, message, true, { from: actor1})
-                    await utils.sleep(1)
+                    await utils.sleep(2)
                     const revealed2ndVote = await commitReveal.reveal(commitmentId, message, true, { from: actor2})
-                    await utils.sleep(1)
+                    await utils.sleep(2)
                     const revealed3rdVote = await commitReveal.reveal(commitmentId, message, true, { from: actor3})
                     assert.strictEqual(commitmentId, revealed1stVote.logs[0].args.commitmentId, 'unable to call reveal vote')
                     assert.strictEqual(commitmentId, revealed2ndVote.logs[0].args.commitmentId, 'unable to call reveal vote')
@@ -65,6 +67,18 @@ contract('CommitReveal', (accounts) => {
                 else{
                     console.log('Error')
                 }
+            }
+        })
+        it('calculate results of commitment scheme', async() => {
+            // wait for reveal time
+            await utils.sleep(25000)
+            const revealTime = await commitReveal.getRevealTimeout(commitmentId)
+            const timestamp = parseInt(Date.now()/1000)
+            if(timestamp > revealTime.toNumber()){
+                const commitmentResult = await commitReveal.getCommitmentResult(commitmentId, voters, { from: genesisAccount })
+                assert.strictEqual(commitmentResult.logs[0].args.state.toNumber(), 1, 'Invalid result state, losers are: ' + commitmentResult.logs[0].args.losers)
+            }else{
+                console.log('Error!')
             }
         })
     })

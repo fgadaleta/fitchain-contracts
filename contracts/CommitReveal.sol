@@ -38,10 +38,10 @@ contract CommitReveal {
     event CommitmentCommitted(bytes32 commitmentId, address voter);
     event CommitmentTimedout(bytes32 commitmentId);
     event CommitmentRevealed(bytes32 commitmentId, address voter, uint256 revealingTime);
-
+    event CommitmentResult(address[] losers, int8 state);
     // modifiers
     modifier onlyAfterReveal(bytes32 commitmentId){
-        require(settings[commitmentId].revealTimeout >= block.timestamp, 'commitment not revealed yet');
+        require(settings[commitmentId].revealTimeout <= block.timestamp, 'commitment not revealed yet');
         _;
     }
 
@@ -98,7 +98,7 @@ contract CommitReveal {
         uint256 votingDown = 0;
         for(uint256 i=0; i < verifiers.length; i++){
             // (inconsistent commitment)
-            if(commitments[_commitmentId][verifiers[i]].hash != keccak256(abi.encodePacked(commitments[_commitmentId][verifiers[i]].value)))
+            if(commitments[_commitmentId][verifiers[i]].hash != keccak256(abi.encodePacked(commitments[_commitmentId][verifiers[i]].vote, commitments[_commitmentId][verifiers[i]].value)))
             results[_commitmentId].losers.push(verifiers[i]);
             else{
                 if(verifiers.length >=2 && i < verifiers.length-1){
@@ -122,12 +122,14 @@ contract CommitReveal {
             }
         }
         if(votingUp > votingDown) {
+            emit CommitmentResult(results[_commitmentId].losers, 1);
             results[_commitmentId].state = true;
             // slash losers
             return (results[_commitmentId].losers, 1);
         }
         results[_commitmentId].state = false;
         // slash data provider and losers (2nd item in the tuple winners)
+        emit CommitmentResult(results[_commitmentId].losers, 0);
         return (results[_commitmentId].losers, 0);
     }
 
