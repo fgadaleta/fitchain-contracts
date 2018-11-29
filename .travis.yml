@@ -1,0 +1,37 @@
+language: node_js
+
+node_js:
+- "8"
+
+services:
+- docker
+
+sudo: required
+
+cache:
+    directories:
+    - node_modules
+
+env:
+- DEPLOY_PACKAGE=false
+- SOLIDITY_COVERAGE=true
+- SOLC_NIGHTLY=true
+
+matrix:
+    fast_finish: true
+    allow_failures:
+    - env: SOLIDITY_COVERAGE=true
+    - env: SOLC_NIGHTLY=true
+
+before_install:
+- npm install -g npm
+- npm install -g ganache-cli@~6.1.6 har-validator release-it
+- npm install -g eslint
+
+before_script:
+- ganache-cli > ganache-cli.log &
+
+script:
+- npm run lint:solium
+- npm run test
+- npm run migrate

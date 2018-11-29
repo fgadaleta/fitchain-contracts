@@ -1,5 +1,8 @@
-var registry = artifacts.require("Registry")
+/* global artifacts */
+const Registry = artifacts.require('FitchainRegistry.sol')
+const Stake = artifacts.require('FitchainStake.sol')
 
-module.exports = function(deployer) {
-  deployer.deploy(registry);
-};
+const registry = async (deployer, network) => {
+    await deployer.deploy(Registry, Stake.address)
+}
+module.exports = registry
