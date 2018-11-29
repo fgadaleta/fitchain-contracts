@@ -8,6 +8,7 @@ module.exports = {
     'plugins': ['security'],
 
     rules: {
+        'no-console': 'off',
         'indent': [2, 4, { 'SwitchCase': 1, 'VariableDeclarator': 1 }],
         'space-before-function-paren': [2, { 'anonymous': 'never', 'named': 'never' }],
 

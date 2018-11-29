@@ -26,6 +26,11 @@ contract FitchainRegistry is Ownable {
         _;
     }
 
+    modifier onlyExist(address actor){
+        require(registrants[actor].exists, 'Actor does not exists!');
+        _;
+    }
+
     modifier onlyFreeSlots(address actor){
         require(registrants[actor].slots == registrants[actor].maxSlots, 'registrant is busy, please free slots!');
         _;
@@ -41,7 +46,7 @@ contract FitchainRegistry is Ownable {
         staking = FitchainStake(_stakeAddress);
     }
 
-    function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) public onlyRegistryOwner(actor) onlyNotExist(actor) returns(bool) {
+    function register(address actor, uint256 slots, bytes32 stakeId, uint256 amount) public onlyNotExist(actor) returns(bool) {
         require(slots >= 1, 'invalid number of free slots');
         require(staking.stake(stakeId, actor, slots * amount));
         registrants[actor] = Registrant(true, slots, slots, msg.sender);
@@ -57,9 +62,13 @@ contract FitchainRegistry is Ownable {
         return staking.release(stakeId, actor, amount);
     }
 
-    function slashActor(bytes32 stakeId, address actor, uint256 amount, bool decrementSlots) public onlyRegistryOwner(actor) onlyNotExist(actor) returns(bool){
+    function slashActor(bytes32 stakeId, address actor, uint256 amount, bool decrementSlots) public onlyRegistryOwner(actor) onlyExist(actor) returns(bool){
         require(staking.slash(stakeId, actor, amount), 'unable to slash the actor');
-        if(decrementSlots) decrementActorSlots(actor);
+        if(decrementSlots) {
+            decrementActorSlots(actor);
+            // decrement the max slots after slashing the stake
+            registrants[actor].maxSlots -=1;
+        }
         return true;
     }
 
@@ -69,6 +78,10 @@ contract FitchainRegistry is Ownable {
 
     function getActorFreeSlots(address actor) public view returns(uint256) {
         return registrants[actor].slots;
+    }
+
+    function getActorMaxSlots(address actor) public view returns(uint256) {
+        return registrants[actor].maxSlots;
     }
 
     function removeActorFromRegistry(address actor)  private returns(bool) {
