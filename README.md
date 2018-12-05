@@ -14,9 +14,10 @@ Fitchain [contracts](docs/ContractsStructure.md) implements the following module
 
 For local deployment, follow the below steps in order to setup fitchain contracts in your machine
 
-- In a new terminal, install then start testrpc (or ganache-cli)
+- In a new terminal, install required packages then start testrpc (or ganache-cli)
 
 ```
+  $ npm install
   $ npm install -g ganache-cli 
   $ ganache-cli 
 ```
