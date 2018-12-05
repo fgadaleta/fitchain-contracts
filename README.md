@@ -3,7 +3,7 @@
 
 ![Fitchain Travis](https://travis-ci.com/aabdulwahed/fitchain-contracts.svg?branch=master)
 
-Fitchain [contracts](docs/ContractsStructure.md) implement the following modules:
+Fitchain [contracts](docs/ContractsStructure.md) implements the following modules:
 - Gossipers pool for proof of training
 - Verifiers pool for verification game 
 - Commit-Reveal scheme for secure voting
@@ -14,38 +14,53 @@ Fitchain [contracts](docs/ContractsStructure.md) implement the following modules
 
 For local deployment, follow the below steps in order to setup fitchain contracts in your machine
 
-1. Start testrpc (or ganache-cli)
+- In a new terminal, install then start testrpc (or ganache-cli)
 
-``` $ ganache-cli ```
+```
+  $ npm install -g ganache-cli 
+  $ ganache-cli 
+```
 
 
-2. Set sender address in ```truffle.js``` with one account created in ```ganache```
+- Skip this step, if you are running local testnet. Configure `truffle.js` by adding the network IP address.
 
 
 ```javascript
 module.exports = {
-  networks: {
-    development: {
-      host: "localhost",
-      port: 8545,
-      from: "ganache sender address",  
-      gas: 5000000,
-      network_id: "*" // Match any network id
+	networks: {
+        development: {
+            host: 'localhost',
+            port: 8545,
+            network_id: '*',
+            gas: 6000000
+        }
+	},
+	compilers: {
+        solc: {
+            version: '0.4.25'
+        }
+	},
+	solc:{
+        optimizer: {
+            enabled: true,
+            runs: 200
+        }
     }
-  }
 };
 ```
 
-3. Launch truffle
+- Compile & test solidity contracts as follows
 
-` $ truffle test `
+```
+  $ npm run compile
+  $ npm run test
+```
 
+- Finally, migrate fitchain contracts
 
-### Installing
-
-Once connected to the Ethereum blockchain (and edited `truffle.js` accordingly), migrate the contracts with 
-
-```$ truffle migrate ```
+```
+  $ npm run migrate 
+```
 
 
 ## Documentation
