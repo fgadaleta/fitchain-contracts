@@ -1,14 +1,18 @@
+[![banner](docs/imgs/fitchain-banner.png)](https://fitchain.io)
 # Fitchain contracts
 
 ![Fitchain Travis](https://travis-ci.com/aabdulwahed/fitchain-contracts.svg?branch=master)
 
-Implementation of the fitchain registry and Validator Pool Contract (VPC) for the Ethereum blockchain.
-The two contracts hereby implemented are 
-
-- `vpc.sol`: registry of actors (data owner, data scientist, validator) and validation channels
-- `registry.sol`:  registry of models and model challenges
+Fitchain [contracts](docs/ContractsStructure.md) implement the following modules:
+- Gossipers pool for proof of training
+- Verifiers pool for verification game 
+- Commit-Reveal scheme for secure voting
+- Actors registry such as verifiers, gossipers, data owners
+- Model Registry that manages the model life cycle
 
 ## Getting Started
+
+For local deployment, follow the below steps in order to setup fitchain contracts in your machine
 
 1. Start testrpc (or ganache-cli)
 
@@ -44,11 +48,15 @@ Once connected to the Ethereum blockchain (and edited `truffle.js` accordingly),
 ```$ truffle migrate ```
 
 
-## Authors
+## Documentation
 
-* **Francesco Gadaleta** - *Initial work* - [fgadaleta](https://github.com/fgadaleta)
+- [Architecture documentation](docs/ContractsStructure.md)
+- [APIs documentation - WIP](docs/api.md)
 
-See also the list of [contributors](CONTRIBUTORS.md) who participated in this project.
+## Contributing
+
+For any new issue, feature, or update, create a pull request and we will add it there.See also the list 
+of [contributors](CONTRIBUTORS.md) who participated in this project. 
 
 ## License
 
