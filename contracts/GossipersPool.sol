@@ -93,8 +93,13 @@ contract GossipersPool {
         return registry.register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
     }
 
-    function deregisterGossiper(address actor) public returns(bool){
-        return registry.deregister(actor,  keccak256(abi.encodePacked(address(this))));
+    function isRegisteredGossiper(address gossiper) public view returns(bool){
+        require(gossiper != address(0), 'invalid gossiper address');
+        return registry.isActorRegistered(gossiper);
+    }
+
+    function deregisterGossiper() public returns(bool){
+        return registry.deregister(msg.sender,  keccak256(abi.encodePacked(address(this))));
     }
 
     function getAvailableGossipers() private view returns(address[]){
@@ -102,7 +107,7 @@ contract GossipersPool {
     }
 
     function getKGossipers(bytes32 channelId, uint256 K) private returns(uint256){
-        address [] memory gossipersSet = getAvailableGossipers();
+        address[] memory gossipersSet = getAvailableGossipers();
         for(uint256 i=0; i< K; i++){
             channels[channelId].gossipers.push(gossipersSet[i]);
             registry.decrementActorSlots(gossipersSet[i]);
@@ -156,11 +161,11 @@ contract GossipersPool {
     function submitProof(bytes32 channelId, string eot, bytes32[] merkleroot, bytes signature, bytes32 result) public canVerify(channelId) returns(bool) {
         bytes32 prefixedHash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(channelId, merkleroot, eot, result)));
         if(isValidSignature(prefixedHash, signature, msg.sender)){
-                proofs[channels[channelId].proof].signatures.push(signature);
-                proofs[channels[channelId].proof].proofHashs.push(prefixedHash);
-                proofs[channels[channelId].proof].results.push(result);
-                emit PoTSubmitted(channelId, channels[channelId].proof, msg.sender, prefixedHash);
-                return true;
+            proofs[channels[channelId].proof].signatures.push(signature);
+            proofs[channels[channelId].proof].proofHashs.push(prefixedHash);
+            proofs[channels[channelId].proof].results.push(result);
+            emit PoTSubmitted(channelId, channels[channelId].proof, msg.sender, prefixedHash);
+            return true;
         }
         return false;
     }
