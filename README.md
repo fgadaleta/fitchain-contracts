@@ -4,7 +4,7 @@
 ![Fitchain Travis](https://travis-ci.com/aabdulwahed/fitchain-contracts.svg?branch=master)
 
 Fitchain [contracts](docs/ContractsStructure.md) implements the following modules:
-- Gossipers pool for proof of training
+- Gossipers channel for proof of training
 - Verifiers pool for verification game 
 - Commit-Reveal scheme for secure voting
 - Actors registry such as verifiers, gossipers, data owners
@@ -23,7 +23,7 @@ For local deployment, follow the below steps in order to setup fitchain contract
 ```
 
 
-- Skip this step, if you are running local testnet. Configure `truffle.js` by adding the network IP address.
+- Skip this step, if you are running local testnet. Configure `truffle.js` by adding the network Id, host IP address, and port number.
 
 
 ```javascript

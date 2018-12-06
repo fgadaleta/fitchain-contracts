@@ -8,7 +8,7 @@ import './FitchainRegistry.sol';
 @author Team: Fitchain Team
 */
 
-contract GossipersPool is FitchainRegistry {
+contract GossipersPool {
 
     // lighting channels
     struct Channel {
@@ -38,6 +38,9 @@ contract GossipersPool is FitchainRegistry {
     mapping(bytes32 => Channel) channels;
     mapping(bytes32 => Proof) proofs;
     mapping(address => GPCsettings) settings;
+    FitchainRegistry private registry;
+
+
 
     // events
     event ChannelInitialized(bytes32 channelId, address[] gossipers, bytes32 proofId);
@@ -79,27 +82,30 @@ contract GossipersPool is FitchainRegistry {
     }
 
     // init GPC settings
-    constructor(uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
+    constructor(address _registryAddress, address _stakeAddress, uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
+        require(_registryAddress != address(0), 'invalid registry contract address');
+        require(_stakeAddress != address(0), 'invalid stake contract address');
         settings[address(this)] = GPCsettings(_minKGossipers, _maxKGossipers, _minStake);
+        registry = FitchainRegistry(_registryAddress);
     }
 
     function registerGossiper(uint256 amount, uint256 slots) public onlyValidStake(amount) returns(bool){
-        return super.register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
+        return registry.register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
     }
 
     function deregisterGossiper(address actor) public returns(bool){
-        return super.deregister(actor,  keccak256(abi.encodePacked(address(this))));
+        return registry.deregister(actor,  keccak256(abi.encodePacked(address(this))));
     }
 
     function getAvailableGossipers() private view returns(address[]){
-        return super.getAvaliableRegistrants();
+        return registry.getAvaliableRegistrants();
     }
 
     function getKGossipers(bytes32 channelId, uint256 K) private returns(uint256){
-        address[] memory gossipersSet = getAvailableGossipers();
+        address [] memory gossipersSet = getAvailableGossipers();
         for(uint256 i=0; i< K; i++){
             channels[channelId].gossipers.push(gossipersSet[i]);
-            super.decrementActorSlots(gossipersSet[i]);
+            registry.decrementActorSlots(gossipersSet[i]);
         }
         return channels[channelId].gossipers.length;
     }
@@ -111,7 +117,7 @@ contract GossipersPool is FitchainRegistry {
         channels[channelId] = Channel(true, owner, proofId,new address[](0));
         require(getKGossipers(channelId, KGossipers) == KGossipers , 'Unable to initialize channel');
         for (uint256 i=0; i<channels[channelId].gossipers.length; i++){
-            decrementActorSlots(channels[channelId].gossipers[i]);
+            registry.decrementActorSlots(channels[channelId].gossipers[i]);
         }
         emit ChannelInitialized(channelId, channels[channelId].gossipers, proofId);
         return true;
@@ -150,11 +156,11 @@ contract GossipersPool is FitchainRegistry {
     function submitProof(bytes32 channelId, string eot, bytes32[] merkleroot, bytes signature, bytes32 result) public canVerify(channelId) returns(bool) {
         bytes32 prefixedHash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(channelId, merkleroot, eot, result)));
         if(isValidSignature(prefixedHash, signature, msg.sender)){
-            proofs[channels[channelId].proof].signatures.push(signature);
-            proofs[channels[channelId].proof].proofHashs.push(prefixedHash);
-            proofs[channels[channelId].proof].results.push(result);
-            emit PoTSubmitted(channelId, channels[channelId].proof, msg.sender, prefixedHash);
-            return true;
+                proofs[channels[channelId].proof].signatures.push(signature);
+                proofs[channels[channelId].proof].proofHashs.push(prefixedHash);
+                proofs[channels[channelId].proof].results.push(result);
+                emit PoTSubmitted(channelId, channels[channelId].proof, msg.sender, prefixedHash);
+                return true;
         }
         return false;
     }
@@ -172,7 +178,7 @@ contract GossipersPool is FitchainRegistry {
             proofs[channels[channelId].proof].isVerified = true;
             // free gossipers
             for (uint j=0; j < channels[channelId].gossipers.length; j++){
-                incrementActorSlots(channels[channelId].gossipers[i]);
+                registry.incrementActorSlots(channels[channelId].gossipers[i]);
                 //TODO: free the gossiper stake
             }
             emit PoTValidated(channelId, channels[channelId].proof);
