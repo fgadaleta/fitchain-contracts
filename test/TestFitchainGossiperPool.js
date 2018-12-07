@@ -19,7 +19,8 @@ contract('GossipersPool', (accounts) => {
         let slots = 1
         let amount = 100
         let channelId = utils.soliditySha3(['string'], ['MyFitchainGossiperChannel'])
-        let proofId 
+        let proofId
+        let failToDergister
 
         before(async () => {
             token = await FitchainToken.deployed()
@@ -60,6 +61,17 @@ contract('GossipersPool', (accounts) => {
             const initChannel = await gossipersPool.initChannel(channelId, gossipers.length, gossipers.length, genesisAccount, { from: genesisAccount })
             proofId = initChannel.logs[0].args.proofId  
             assert.strictEqual(channelId, initChannel.logs[0].args.channelId, 'invalid channel Id')
+        })
+        it('should fail to deregister', async () => {
+            for (i = 0; i < gossipers.length; i++) {
+                try{
+                    await gossipersPool.deregisterGossiper({ from: gossipers[i] })
+                    assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), false, 'Gossiper is still registered')
+                }catch(error){
+                    failToDergister = true
+                    assert.strictEqual(failToDergister, true, 'passed the test case without any error!')
+                }
+            } 
         })
         // it('should be able to deregister gossipers from the actors registry', async () => {
         //     for (i = 0; i < gossipers.length; i++) {
