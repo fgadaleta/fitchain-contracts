@@ -45,7 +45,7 @@ contract GossipersPool {
     // events
     event ChannelInitialized(bytes32 channelId, address[] gossipers, bytes32 proofId);
     event PoTSubmitted(bytes32 channelId, bytes32 proofId, address verifier, bytes32 proofHash);
-    event PoTValidated(bytes32 channelId, bytes32 proofId);
+    event PoTValidated(bytes32 channelId, bytes32 proofId, bool state);
 
 
     // access control modifiers
@@ -169,6 +169,13 @@ contract GossipersPool {
         return false;
     }
 
+    function freeChannelSlots(bytes32 channelId) private returns(bool){
+        for (uint j=0; j < channels[channelId].gossipers.length; j++){
+                registry.incrementActorSlots(channels[channelId].gossipers[j]);
+                //TODO: free the gossiper stake
+            }
+        return true;
+    }
     function validateProof(bytes32 channelId) public returns (bool){
         uint256 kValidProofs = 0;
         for(uint256 i=0; i<proofs[channels[channelId].proof].signatures.length; i++){
@@ -178,16 +185,14 @@ contract GossipersPool {
                 }
             }
         }
-        if(proofs[channels[channelId].proof].MofNSigs == kValidProofs) {
+        if(proofs[channels[channelId].proof].MofNSigs <= kValidProofs) {
             proofs[channels[channelId].proof].isVerified = true;
             // free gossipers
-            for (uint j=0; j < channels[channelId].gossipers.length; j++){
-                registry.incrementActorSlots(channels[channelId].gossipers[i]);
-                //TODO: free the gossiper stake
-            }
-            emit PoTValidated(channelId, channels[channelId].proof);
+            require(freeChannelSlots(channelId) ==, 'unable to free channel');
+            emit PoTValidated(channelId, channels[channelId].proof, true);
             return true;
         }
+        emit PoTValidated(channelId, channels[channelId].proof, false);
         return false;
     }
 
