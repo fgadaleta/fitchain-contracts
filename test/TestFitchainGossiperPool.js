@@ -48,11 +48,21 @@ contract('GossipersPool', (accounts) => {
                 assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), true, 'Gossiper is not registered')
             }
         })
+
+        it('should be able to get available gossipers', async () => {
+            const availableGossipers = await gossipersPool.getAvailableGossipers()
+            assert.strictEqual(availableGossipers.length , gossipers.length, 'invalid available gossipers number')
+        })
+
         it('should be able to deregister gossipers from the actors registry', async () => {
             for (i = 0; i < gossipers.length; i++) {
                 await gossipersPool.deregisterGossiper({ from: gossipers[i] })
                 assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), false, 'Gossiper is still registered')
             }
+        })
+        it('should get zero registered gossipers', async () => {
+            const noGossipers = await gossipersPool.getAvailableGossipers()
+            assert.strictEqual(0, noGossipers.length, 'should get zero!') 
         })
     })
 })

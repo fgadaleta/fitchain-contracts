@@ -102,7 +102,7 @@ contract GossipersPool {
         return registry.deregister(msg.sender,  keccak256(abi.encodePacked(address(this))));
     }
 
-    function getAvailableGossipers() private view returns(address[]){
+    function getAvailableGossipers() public view returns(address[]){
         return registry.getAvaliableRegistrants();
     }
 
