@@ -18,6 +18,8 @@ contract('GossipersPool', (accounts) => {
         let gossipers = [accounts[1], accounts[2], accounts[3]]
         let slots = 1
         let amount = 100
+        let channelId = utils.soliditySha3(['string'], ['MyFitchainGossiperChannel'])
+        let proofId 
 
         before(async () => {
             token = await FitchainToken.deployed()
@@ -53,16 +55,21 @@ contract('GossipersPool', (accounts) => {
             const availableGossipers = await gossipersPool.getAvailableGossipers()
             assert.strictEqual(availableGossipers.length , gossipers.length, 'invalid available gossipers number')
         })
-
-        it('should be able to deregister gossipers from the actors registry', async () => {
-            for (i = 0; i < gossipers.length; i++) {
-                await gossipersPool.deregisterGossiper({ from: gossipers[i] })
-                assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), false, 'Gossiper is still registered')
-            }
+        it('should be able to initialize a gossiper channel', async () => {
+            // initChannel(bytes32 channelId, uint256 KGossipers, uint256 mOfN, address owner)
+            const initChannel = await gossipersPool.initChannel(channelId, gossipers.length, gossipers.length, genesisAccount, { from: genesisAccount })
+            proofId = initChannel.logs[0].args.proofId  
+            assert.strictEqual(channelId, initChannel.logs[0].args.channelId, 'invalid channel Id')
         })
-        it('should get zero registered gossipers', async () => {
-            const noGossipers = await gossipersPool.getAvailableGossipers()
-            assert.strictEqual(0, noGossipers.length, 'should get zero!') 
-        })
+        // it('should be able to deregister gossipers from the actors registry', async () => {
+        //     for (i = 0; i < gossipers.length; i++) {
+        //         await gossipersPool.deregisterGossiper({ from: gossipers[i] })
+        //         assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), false, 'Gossiper is still registered')
+        //     }
+        // })
+        // it('should get zero registered gossipers', async () => {
+        //     const noGossipers = await gossipersPool.getAvailableGossipers()
+        //     assert.strictEqual(0, noGossipers.length, 'should get zero!') 
+        // })
     })
 })

@@ -110,7 +110,6 @@ contract GossipersPool {
         address[] memory gossipersSet = getAvailableGossipers();
         for(uint256 i=0; i< K; i++){
             channels[channelId].gossipers.push(gossipersSet[i]);
-            registry.decrementActorSlots(gossipersSet[i]);
         }
         return channels[channelId].gossipers.length;
     }
