@@ -105,7 +105,8 @@ contract('GossipersPool', (accounts) => {
             assert.strictEqual(await gossipersPool.isChannelTerminated(channelId), true, 'unable to termiante the channel')
         })
         it('should return zero registrant', async () => {
-
+            const gossipersList = await gossipersPool.getAvailableGossipers()
+            assert.strictEqual(gossipersList.length, 0, 'The gossipers registry is not empty')
         })
     })
 })
