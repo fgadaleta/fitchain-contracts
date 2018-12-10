@@ -15,12 +15,12 @@ const utils = {
     sleep: (millis) => {
         return new Promise(resolve => setTimeout(resolve, millis))
     },
-    createHash:(web3, channelId, merkleRoot, eot, result) => {
+    createHash: (web3, channelId, merkleRoot, eot, result) => {
         return web3.utils.soliditySha3(
-            {type: 'bytes32', value: channelId},
-            {type: 'bytes32[]', value: merkleRoot},
-            {type: 'string', value: eot},
-            {type: 'bytes32', value: result}
+            { type: 'bytes32', value: channelId },
+            { type: 'bytes32[]', value: merkleRoot },
+            { type: 'string', value: eot },
+            { type: 'bytes32', value: result }
         ).toString('hex')
     }
 }

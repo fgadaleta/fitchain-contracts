@@ -45,8 +45,7 @@ contract GossipersPool {
     // events
     event ChannelInitialized(bytes32 channelId, address[] gossipers, bytes32 proofId);
     event PoTSubmitted(bytes32 channelId, bytes32 proofId, address verifier, bytes32 proofHash);
-    event PoTValidated(bytes32 channelId, bytes32 proofId, bool state);
-
+    event PoTValidated(bytes32 channelId, bytes32 proofId, bool state, uint256 submittedProofs);
 
     // access control modifiers
     modifier requireKGossipers(uint256 KGossipers, uint256 mOfN) {
@@ -149,8 +148,8 @@ contract GossipersPool {
         return (proofs[proofId].isVerified, proofs[proofId].channelId, proofs[proofId].proofHashs);
     }
 
-    function isValidProof(bytes32 proofId) public view returns(bool) {
-        return proofs[proofId].isVerified;
+    function isValidProof(bytes32 channelId) public view returns(bool) {
+        return proofs[channels[channelId].proof].isVerified;
     }
 
     function isValidSignature(bytes32 hash, bytes signature, address gossiper) private pure returns (bool){
@@ -171,9 +170,9 @@ contract GossipersPool {
 
     function freeChannelSlots(bytes32 channelId) private returns(bool){
         for (uint j=0; j < channels[channelId].gossipers.length; j++){
-                registry.incrementActorSlots(channels[channelId].gossipers[j]);
-                //TODO: free the gossiper stake
-            }
+            registry.incrementActorSlots(channels[channelId].gossipers[j]);
+            //TODO: free the gossiper stake
+        }
         return true;
     }
     function validateProof(bytes32 channelId) public returns (bool){
@@ -183,16 +182,20 @@ contract GossipersPool {
                 if(proofs[channels[channelId].proof].proofHashs[i] == proofs[channels[channelId].proof].proofHashs[i+1]) {
                     kValidProofs +=1;
                 }
+            }else{
+                if(proofs[channels[channelId].proof].proofHashs[i] == proofs[channels[channelId].proof].proofHashs[i-1]){
+                    kValidProofs +=1;
+                }
             }
         }
         if(proofs[channels[channelId].proof].MofNSigs <= kValidProofs) {
             proofs[channels[channelId].proof].isVerified = true;
             // free gossipers
-            require(freeChannelSlots(channelId) ==, 'unable to free channel');
-            emit PoTValidated(channelId, channels[channelId].proof, true);
+            require(freeChannelSlots(channelId), 'unable to free channel');
+            emit PoTValidated(channelId, channels[channelId].proof, true, kValidProofs);
             return true;
         }
-        emit PoTValidated(channelId, channels[channelId].proof, false);
+        emit PoTValidated(channelId, channels[channelId].proof, false, kValidProofs);
         return false;
     }
 

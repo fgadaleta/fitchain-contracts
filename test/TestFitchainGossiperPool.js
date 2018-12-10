@@ -56,7 +56,7 @@ contract('GossipersPool', (accounts) => {
 
         it('should be able to get available gossipers', async () => {
             const availableGossipers = await gossipersPool.getAvailableGossipers()
-            assert.strictEqual(availableGossipers.length , gossipers.length, 'invalid available gossipers number')
+            assert.strictEqual(availableGossipers.length, gossipers.length, 'invalid available gossipers number')
         })
         it('should be able to initialize a gossiper channel', async () => {
             // initChannel(bytes32 channelId, uint256 KGossipers, uint256 mOfN, address owner)
@@ -66,31 +66,30 @@ contract('GossipersPool', (accounts) => {
         })
         it('should fail to deregister', async () => {
             for (i = 0; i < gossipers.length; i++) {
-                try{
+                try {
                     await gossipersPool.deregisterGossiper({ from: gossipers[i] })
                     assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), false, 'Gossiper is still registered')
-                }catch(error){
+                } catch (error) {
                     failToDergister = true
                     assert.strictEqual(failToDergister, true, 'passed the test case without any error!')
                 }
-            } 
+            }
         })
         it('should gossipers submit proof', async () => {
-            //submitProof(bytes32 channelId, string eot, bytes32[] merkleroot, bytes signature, bytes32 result)
+            // submitProof(bytes32 channelId, string eot, bytes32[] merkleroot, bytes signature, bytes32 result)
             const merkleRoot = [utils.soliditySha3(['string'], ['trx1']), utils.soliditySha3(['string'], ['trx2']), utils.soliditySha3(['string'], ['trx3'])]
-            const result = utils.soliditySha3(['string'], ['results'])  
-            // channelId, merkleroot, eot, result 
+            const result = utils.soliditySha3(['string'], ['results'])
+            // channelId, merkleroot, eot, result
             const hash = utils.createHash(web3, channelId, merkleRoot, eot, result)
-            for (i = 0; i < gossipers.length; i++) { 
+            for (i = 0; i < gossipers.length; i++) {
                 signature = await web3.eth.sign(hash, gossipers[i])
-                proof = await gossipersPool.submitProof(channelId, eot, merkleRoot, signature, result, {from: gossipers[i]})
+                proof = await gossipersPool.submitProof(channelId, eot, merkleRoot, signature, result, { from: gossipers[i] })
                 assert.strictEqual(proof.logs[0].args.proof, proofId, 'invalid proof Id')
             }
         })
-        it('should be able to validata proof', async () => {
-            const validateProof = await gossipersPool.validateProof(channelId, { from: genesisAccount })
-            console.log(validateProof.logs[0])
-            assert.strictEqual(await gossipersPool.isValidProof(channelId), true, 'proof is not valid')
+        it('should be able to validate proof', async () => {
+            await gossipersPool.validateProof(channelId, { from: genesisAccount })
+            assert.strictEqual(await gossipersPool.isValidProof(channelId), true, 'proof is not verified by gossipers')
         })
         // it('should be able to deregister gossipers from the actors registry', async () => {
         //     for (i = 0; i < gossipers.length; i++) {
@@ -100,7 +99,7 @@ contract('GossipersPool', (accounts) => {
         // })
         // it('should get zero registered gossipers', async () => {
         //     const noGossipers = await gossipersPool.getAvailableGossipers()
-        //     assert.strictEqual(0, noGossipers.length, 'should get zero!') 
+        //     assert.strictEqual(0, noGossipers.length, 'should get zero!')
         // })
     })
 })
