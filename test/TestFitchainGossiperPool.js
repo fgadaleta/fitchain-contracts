@@ -23,6 +23,7 @@ contract('GossipersPool', (accounts) => {
         let eot = 'THIS IS FAKE END OF TRAINING!'
         let signature
         let proof
+        let createdProofId
 
         before(async () => {
             token = await FitchainToken.deployed()
@@ -62,6 +63,7 @@ contract('GossipersPool', (accounts) => {
             // initChannel(bytes32 channelId, uint256 KGossipers, uint256 mOfN, address owner)
             const initChannel = await gossipersPool.initChannel(channelId, gossipers.length, gossipers.length, genesisAccount, { from: genesisAccount })
             proofId = initChannel.logs[0].proofId
+            createdProofId = initChannel.logs[0].args.proofId
             assert.strictEqual(channelId, initChannel.logs[0].args.channelId, 'invalid channel Id')
         })
         it('should fail to deregister', async () => {
@@ -87,19 +89,27 @@ contract('GossipersPool', (accounts) => {
                 assert.strictEqual(proof.logs[0].args.proof, proofId, 'invalid proof Id')
             }
         })
+        it('should be able to get proof Id by channel Id', async () => {
+            const onChainProofId = await gossipersPool.getProofIdByChannelId(channelId, { from: genesisAccount })
+            assert.strictEqual(onChainProofId, createdProofId, 'invalid proof id')
+        })
         it('should be able to validate proof', async () => {
             await gossipersPool.validateProof(channelId, { from: genesisAccount })
             assert.strictEqual(await gossipersPool.isValidProof(channelId), true, 'proof is not verified by gossipers')
         })
-        // it('should be able to deregister gossipers from the actors registry', async () => {
-        //     for (i = 0; i < gossipers.length; i++) {
-        //         await gossipersPool.deregisterGossiper({ from: gossipers[i] })
-        //         assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), false, 'Gossiper is still registered')
-        //     }
-        // })
-        // it('should get zero registered gossipers', async () => {
-        //     const noGossipers = await gossipersPool.getAvailableGossipers()
-        //     assert.strictEqual(0, noGossipers.length, 'should get zero!')
-        // })
+        it('should be able to deregister gossipers from the actors registry', async () => {
+            for (i = 0; i < gossipers.length; i++) {
+                await gossipersPool.deregisterGossiper({ from: gossipers[i] })
+                assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), false, 'Gossiper is still registered')
+            }
+        })
+        it('should get zero registered gossipers', async () => {
+            const noGossipers = await gossipersPool.getAvailableGossipers()
+            assert.strictEqual(0, noGossipers.length, 'should get zero!')
+        })
+        it('should terminate channel after verifing the PoT', async () => {
+            await gossipersPool.terminateChannel(channelId, { from: genesisAccount })
+            assert.strictEqual(await gossipersPool.isChannelTerminated(channelId), true, 'unable to termiante the channel')
+        })
     })
 })

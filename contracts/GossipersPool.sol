@@ -144,7 +144,8 @@ contract GossipersPool {
         return channels[channelId].proof;
     }
 
-    function getProof(bytes32 proofId) public view returns(bool, bytes32, bytes32[]) {
+    function getProof(bytes32 channelId) public view returns(bool, bytes32, bytes32[]) {
+        bytes32 proofId = channels[channelId].proof;
         return (proofs[proofId].isVerified, proofs[proofId].channelId, proofs[proofId].proofHashs);
     }
 
@@ -201,5 +202,10 @@ contract GossipersPool {
 
     function getChannelOwner(bytes32 channelId) public view returns(address) {
         return channels[channelId].owner;
+    }
+
+    function isChannelTerminated(bytes32 channelId) public view returns (bool) {
+        if (channels[channelId].state) return false;
+        return true;
     }
 }
