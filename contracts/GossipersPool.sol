@@ -81,9 +81,8 @@ contract GossipersPool {
     }
 
     // init GPC settings
-    constructor(address _registryAddress, address _stakeAddress, uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
+    constructor(address _registryAddress, uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
         require(_registryAddress != address(0), 'invalid registry contract address');
-        require(_stakeAddress != address(0), 'invalid stake contract address');
         settings[address(this)] = GPCsettings(_minKGossipers, _maxKGossipers, _minStake);
         registry = FitchainRegistry(_registryAddress);
     }
