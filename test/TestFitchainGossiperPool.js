@@ -2,7 +2,6 @@
 
 const FitchainToken = artifacts.require('FitchainToken.sol')
 const FitchainStake = artifacts.require('FitchainStake.sol')
-const Registry = artifacts.require('FitchainRegistry.sol')
 const GossipersPool = artifacts.require('GossipersPool.sol')
 const utils = require('./utils.js')
 
@@ -12,7 +11,6 @@ contract('GossipersPool', (accounts) => {
     describe('Test Gossipers Pool in Fitchain', () => {
         let token, i
         let staking
-        let registry
         let totalSupply
         let genesisAccount = accounts[0]
         let gossipers = [accounts[1], accounts[2], accounts[3]]
@@ -22,13 +20,12 @@ contract('GossipersPool', (accounts) => {
         let failToDergister
         let eot = 'THIS IS FAKE END OF TRAINING!'
         let signature
-        let proof
-        let createdProofId
+        let proof, proofId
+        let createdProofId, gossipersPool, genesisBalance
 
         before(async () => {
             token = await FitchainToken.deployed()
             staking = await FitchainStake.deployed()
-            registry = await Registry.deployed()
             gossipersPool = await GossipersPool.deployed()
 
             // init gossiper wallets
@@ -37,9 +34,6 @@ contract('GossipersPool', (accounts) => {
             }
             totalSupply = await token.totalSupply()
             genesisBalance = web3.utils.toDecimal(await token.balanceOf(genesisAccount))
-
-            stakeId = utils.soliditySha3(['address'], [registry.address])
-
             assert.strictEqual(totalSupply.toNumber() - ((gossipers.length * slots * amount) + gossipers.length), genesisBalance, 'Invalid transfer!')
 
             for (i = 0; i < gossipers.length; i++) {
@@ -62,7 +56,6 @@ contract('GossipersPool', (accounts) => {
         it('should be able to initialize a gossiper channel', async () => {
             // initChannel(bytes32 channelId, uint256 KGossipers, uint256 mOfN, address owner)
             const initChannel = await gossipersPool.initChannel(channelId, gossipers.length, gossipers.length, genesisAccount, { from: genesisAccount })
-            proofId = initChannel.logs[0].proofId
             createdProofId = initChannel.logs[0].args.proofId
             assert.strictEqual(channelId, initChannel.logs[0].args.channelId, 'invalid channel Id')
         })
@@ -110,6 +103,9 @@ contract('GossipersPool', (accounts) => {
         it('should terminate channel after verifing the PoT', async () => {
             await gossipersPool.terminateChannel(channelId, { from: genesisAccount })
             assert.strictEqual(await gossipersPool.isChannelTerminated(channelId), true, 'unable to termiante the channel')
+        })
+        it('should return zero registrant', async () => {
+
         })
     })
 })
