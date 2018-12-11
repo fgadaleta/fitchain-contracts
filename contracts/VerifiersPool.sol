@@ -94,6 +94,10 @@ contract VerifiersPool {
         VPCsettings[address(this)] = VPCSetting(_minKVerifiers, _minStake, _commitTimeout, _revealTimeout);
     }
 
+    function doesChallengeExist(bytes32 challengeId) public view returns(bool){
+        return challenges[challengeId].exist;
+    }
+
     function initChallenge(bytes32 modelId, bytes32 challengeId, uint256 wallTime, uint256 kVerifiers, bytes32 testingData) public onlyNotExistChallenge(challengeId) returns(bool){
         require(wallTime > 20, 'invalid wallTime, should be at least greater than average block interval');
         address[] memory verifiers = getAvailableVerifiers();
@@ -128,7 +132,7 @@ contract VerifiersPool {
         return (losers, -1);
     }
 
-    function getAvailableVerifiers() private view returns(address[]){
+    function getAvailableVerifiers() public view returns(address[]){
         return registry.getAvaliableRegistrants();
     }
 
@@ -148,7 +152,6 @@ contract VerifiersPool {
         address[] memory verifiersSet = getAvailableVerifiers();
         for(uint256 i=0; i< K; i++){
             challenges[challengeId].verifiers.push(verifiersSet[i]);
-            registry.decrementActorSlots(verifiersSet[i]);
         }
         return challenges[challengeId].verifiers.length;
     }
