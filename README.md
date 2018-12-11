@@ -1,54 +1,78 @@
+[![banner](docs/imgs/fitchain-banner.png)](https://fitchain.io)
 # Fitchain contracts
 
 ![Fitchain Travis](https://travis-ci.com/aabdulwahed/fitchain-contracts.svg?branch=master)
 
-Implementation of the fitchain registry and Validator Pool Contract (VPC) for the Ethereum blockchain.
-The two contracts hereby implemented are 
-
-- `vpc.sol`: registry of actors (data owner, data scientist, validator) and validation channels
-- `registry.sol`:  registry of models and model challenges
+Fitchain [contracts](docs/ContractsStructure.md) implements the following modules:
+- Gossipers channel for proof of training
+- Verifiers pool for verification game 
+- Commit-Reveal scheme for secure voting
+- Actors registry such as verifiers, gossipers, data owners
+- Model Registry that manages the model life cycle
 
 ## Getting Started
 
-1. Start testrpc (or ganache-cli)
+For local deployment, follow the below steps in order to setup fitchain contracts in your machine
 
-``` $ ganache-cli ```
+- In a new terminal, install required packages then start testrpc (or ganache-cli)
+
+```
+  $ npm install
+  $ npm install -g ganache-cli 
+  $ ganache-cli 
+```
 
 
-2. Set sender address in ```truffle.js``` with one account created in ```ganache```
+- Skip this step, if you are running local testnet. Configure `truffle.js` by adding the network Id, host IP address, and port number.
 
 
 ```javascript
 module.exports = {
-  networks: {
-    development: {
-      host: "localhost",
-      port: 8545,
-      from: "ganache sender address",  
-      gas: 5000000,
-      network_id: "*" // Match any network id
+	networks: {
+        development: {
+            host: 'localhost',
+            port: 8545,
+            network_id: '*',
+            gas: 6000000
+        }
+	},
+	compilers: {
+        solc: {
+            version: '0.4.25'
+        }
+	},
+	solc:{
+        optimizer: {
+            enabled: true,
+            runs: 200
+        }
     }
-  }
 };
 ```
 
-3. Launch truffle
+- Compile & test solidity contracts as follows
 
-` $ truffle test `
+```
+  $ npm run compile
+  $ npm run test
+```
+
+- Finally, migrate fitchain contracts
+
+```
+  $ npm run migrate 
+```
 
 
-### Installing
+## Documentation
 
-Once connected to the Ethereum blockchain (and edited `truffle.js` accordingly), migrate the contracts with 
+- [Architecture documentation](docs/ContractsStructure.md)
+- [APIs documentation - WIP](docs/api.md)
 
-```$ truffle migrate ```
+## Contributing
 
-
-## Authors
-
-* **Francesco Gadaleta** - *Initial work* - [fgadaleta](https://github.com/fgadaleta)
-
-See also the list of [contributors](CONTRIBUTORS.md) who participated in this project.
+For any new issue, feature, or update, create a pull request and we will add it there.See also the list 
+of [contributors](CONTRIBUTORS.md) who participated in this project. 
 
 ## License
 

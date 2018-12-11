@@ -1,3 +1,5 @@
-Daan Gerits
+# Contributors
 
-Francesco Gadaleta
+* [Daan Gerits]()
+* [Francesco Gadaleta](https://github.com/fgadaleta)
+* [Ahmed Ali](https://github.com/aabdulwahed)

@@ -8,7 +8,7 @@ import './FitchainRegistry.sol';
 @author Team: Fitchain Team
 */
 
-contract GossipersPool is FitchainRegistry {
+contract GossipersPool {
 
     // lighting channels
     struct Channel {
@@ -38,12 +38,14 @@ contract GossipersPool is FitchainRegistry {
     mapping(bytes32 => Channel) channels;
     mapping(bytes32 => Proof) proofs;
     mapping(address => GPCsettings) settings;
+    FitchainRegistry private registry;
+
+
 
     // events
     event ChannelInitialized(bytes32 channelId, address[] gossipers, bytes32 proofId);
     event PoTSubmitted(bytes32 channelId, bytes32 proofId, address verifier, bytes32 proofHash);
-    event PoTValidated(bytes32 channelId, bytes32 proofId);
-
+    event PoTValidated(bytes32 channelId, bytes32 proofId, bool state, uint256 submittedProofs);
 
     // access control modifiers
     modifier requireKGossipers(uint256 KGossipers, uint256 mOfN) {
@@ -79,27 +81,33 @@ contract GossipersPool is FitchainRegistry {
     }
 
     // init GPC settings
-    constructor(uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
+    constructor(address _registryAddress, uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
+        require(_registryAddress != address(0), 'invalid registry contract address');
         settings[address(this)] = GPCsettings(_minKGossipers, _maxKGossipers, _minStake);
+        registry = FitchainRegistry(_registryAddress);
     }
 
     function registerGossiper(uint256 amount, uint256 slots) public onlyValidStake(amount) returns(bool){
-        return super.register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
+        return registry.register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
     }
 
-    function deregisterGossiper(address actor) public returns(bool){
-        return super.deregister(actor,  keccak256(abi.encodePacked(address(this))));
+    function isRegisteredGossiper(address gossiper) public view returns(bool){
+        require(gossiper != address(0), 'invalid gossiper address');
+        return registry.isActorRegistered(gossiper);
     }
 
-    function getAvailableGossipers() private view returns(address[]){
-        return super.getAvaliableRegistrants();
+    function deregisterGossiper() public returns(bool){
+        return registry.deregister(msg.sender,  keccak256(abi.encodePacked(address(this))));
+    }
+
+    function getAvailableGossipers() public view returns(address[]){
+        return registry.getAvaliableRegistrants();
     }
 
     function getKGossipers(bytes32 channelId, uint256 K) private returns(uint256){
         address[] memory gossipersSet = getAvailableGossipers();
         for(uint256 i=0; i< K; i++){
             channels[channelId].gossipers.push(gossipersSet[i]);
-            super.decrementActorSlots(gossipersSet[i]);
         }
         return channels[channelId].gossipers.length;
     }
@@ -111,7 +119,7 @@ contract GossipersPool is FitchainRegistry {
         channels[channelId] = Channel(true, owner, proofId,new address[](0));
         require(getKGossipers(channelId, KGossipers) == KGossipers , 'Unable to initialize channel');
         for (uint256 i=0; i<channels[channelId].gossipers.length; i++){
-            decrementActorSlots(channels[channelId].gossipers[i]);
+            registry.decrementActorSlots(channels[channelId].gossipers[i]);
         }
         emit ChannelInitialized(channelId, channels[channelId].gossipers, proofId);
         return true;
@@ -135,12 +143,13 @@ contract GossipersPool is FitchainRegistry {
         return channels[channelId].proof;
     }
 
-    function getProof(bytes32 proofId) public view returns(bool, bytes32, bytes32[]) {
+    function getProof(bytes32 channelId) public view returns(bool, bytes32, bytes32[]) {
+        bytes32 proofId = channels[channelId].proof;
         return (proofs[proofId].isVerified, proofs[proofId].channelId, proofs[proofId].proofHashs);
     }
 
-    function isValidProof(bytes32 proofId) public view returns(bool) {
-        return proofs[proofId].isVerified;
+    function isValidProof(bytes32 channelId) public view returns(bool) {
+        return proofs[channels[channelId].proof].isVerified;
     }
 
     function isValidSignature(bytes32 hash, bytes signature, address gossiper) private pure returns (bool){
@@ -159,6 +168,13 @@ contract GossipersPool is FitchainRegistry {
         return false;
     }
 
+    function freeChannelSlots(bytes32 channelId) private returns(bool){
+        for (uint j=0; j < channels[channelId].gossipers.length; j++){
+            registry.incrementActorSlots(channels[channelId].gossipers[j]);
+            //TODO: free the gossiper stake
+        }
+        return true;
+    }
     function validateProof(bytes32 channelId) public returns (bool){
         uint256 kValidProofs = 0;
         for(uint256 i=0; i<proofs[channels[channelId].proof].signatures.length; i++){
@@ -166,22 +182,29 @@ contract GossipersPool is FitchainRegistry {
                 if(proofs[channels[channelId].proof].proofHashs[i] == proofs[channels[channelId].proof].proofHashs[i+1]) {
                     kValidProofs +=1;
                 }
+            }else{
+                if(proofs[channels[channelId].proof].proofHashs[i] == proofs[channels[channelId].proof].proofHashs[i-1]){
+                    kValidProofs +=1;
+                }
             }
         }
-        if(proofs[channels[channelId].proof].MofNSigs == kValidProofs) {
+        if(proofs[channels[channelId].proof].MofNSigs <= kValidProofs) {
             proofs[channels[channelId].proof].isVerified = true;
             // free gossipers
-            for (uint j=0; j < channels[channelId].gossipers.length; j++){
-                incrementActorSlots(channels[channelId].gossipers[i]);
-                //TODO: free the gossiper stake
-            }
-            emit PoTValidated(channelId, channels[channelId].proof);
+            require(freeChannelSlots(channelId), 'unable to free channel');
+            emit PoTValidated(channelId, channels[channelId].proof, true, kValidProofs);
             return true;
         }
+        emit PoTValidated(channelId, channels[channelId].proof, false, kValidProofs);
         return false;
     }
 
     function getChannelOwner(bytes32 channelId) public view returns(address) {
         return channels[channelId].owner;
+    }
+
+    function isChannelTerminated(bytes32 channelId) public view returns (bool) {
+        if (channels[channelId].state) return false;
+        return true;
     }
 }
