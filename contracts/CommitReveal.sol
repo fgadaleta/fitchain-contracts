@@ -82,7 +82,7 @@ contract CommitReveal {
 
     function reveal(bytes32 _commitmentId, string _value, bool _vote) public onlyCommitmentVoters(_commitmentId) returns(bool){
         if(settings[_commitmentId].revealTimeout >= block.timestamp) emit CommitmentTimedout(_commitmentId);
-        require(commitments[_commitmentId][msg.sender].exist, 'Commitment is not exist!');
+        require(commitments[_commitmentId][msg.sender].exist, 'Commitment does not exist!');
         require(!commitments[_commitmentId][msg.sender].isRevealed, 'Indicating replay attack');
         require(settings[_commitmentId].revealTimeout > block.timestamp && settings[_commitmentId].commitTimeout < block.timestamp, 'invalid reveal timing!');
         require(commitments[_commitmentId][msg.sender].hash == keccak256(abi.encodePacked(_vote, _value)), 'invalid commitment preimage');
