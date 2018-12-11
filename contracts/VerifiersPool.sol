@@ -161,4 +161,8 @@ contract VerifiersPool {
         return challenges[challengeId].owner;
     }
 
+    function isRegisteredVerifier(address verifier) public view returns(bool){
+        require(verifier != address(0), 'invalid gossiper address');
+        return registry.isActorRegistered(verifier);
+    }
 }
