@@ -50,17 +50,17 @@ module.exports = {
 };
 ```
 
-- Compile & test solidity contracts as follows
+- Compile solidity contracts as follows
 
 ```
   $ npm run compile
-  $ npm run test
 ```
 
-- Finally, migrate fitchain contracts
+- Finally, migrate  and test fitchain contracts
 
 ```
   $ npm run migrate 
+  $ npm run test
 ```
 
 
