@@ -41,8 +41,9 @@ contract VerifiersPool {
     CommitReveal private commitReveal;
 
     // events
-    event ChallengeInitialized(bytes32 challengeId, address[] verifiers, bytes32 proofId, bytes32 testingData);
-    event CommitPhaseStarted(bytes32 challengeId, address[] verifiers);
+    event ChallengeInitialized(bytes32 challengeId, address[] verifiers, bytes32 proofId, bytes32 testingData, bool state);
+    event CommitPhaseStarted(bytes32 challengeId, address[] verifiers, bool state);
+    event CommitmentRevealResult(address[] losers, int8 state);
 
     // modifiers
     modifier onlyChallengeVerifiers(bytes32 challengeId){
@@ -94,6 +95,10 @@ contract VerifiersPool {
         VPCsettings[address(this)] = VPCSetting(_minKVerifiers, _minStake, _commitTimeout, _revealTimeout);
     }
 
+    function doesChallengeExist(bytes32 challengeId) public view returns(bool){
+        return challenges[challengeId].exist;
+    }
+
     function initChallenge(bytes32 modelId, bytes32 challengeId, uint256 wallTime, uint256 kVerifiers, bytes32 testingData) public onlyNotExistChallenge(challengeId) returns(bool){
         require(wallTime > 20, 'invalid wallTime, should be at least greater than average block interval');
         address[] memory verifiers = getAvailableVerifiers();
@@ -104,31 +109,51 @@ contract VerifiersPool {
                 registry.decrementActorSlots(challenges[challengeId].verifiers[i]);
             }
             // now verifiers can start validation using
-            emit ChallengeInitialized(challengeId, challenges[challengeId].verifiers, challengeId, testingData);
+            proofs[challengeId] = Proof(true, false);
+            emit ChallengeInitialized(challengeId, challenges[challengeId].verifiers, challengeId, testingData, true);
             return true;
         }
+        emit ChallengeInitialized(challengeId, challenges[challengeId].verifiers, challengeId, testingData, false);
         return false;
 
     }
 
-    function endOfProcessingPhase(bytes32 challengeId) public onlyChallengeVerifiers(challengeId) onlyCanVoteOnce(challengeId) {
+    function startCommitRevealPhase(bytes32 challengeId) public onlyChallengeVerifiers(challengeId) onlyCanVoteOnce(challengeId) returns(bool) {
         voteOnce[challengeId][msg.sender] +=1;
         challenges[challengeId].canCommit +=1;
         if (challenges[challengeId].canCommit == challenges[challengeId].verifiers.length){
-            emit CommitPhaseStarted(challengeId, challenges[challengeId].verifiers);
+            emit CommitPhaseStarted(challengeId, challenges[challengeId].verifiers, true);
             commitReveal.setup(challengeId, VPCsettings[address(this)].commitTimeout, VPCsettings[address(this)].revealTimeout, challenges[challengeId].verifiers);
+            return true;
         }
+        emit CommitPhaseStarted(challengeId, challenges[challengeId].verifiers, false);
+        return false;
     }
 
-    function endOfCommitRevealPhase(bytes32 challengeId) public returns(address[] losers, int8 state){
+    function getCommitRevealResults(bytes32 challengeId) public returns(address[] , int8 ){
+        address[] memory losers;
+        int8 state;
+        uint256 i;
+        uint256 j;
         if (commitReveal.isCommitmentTimedout(challengeId)){
-            return commitReveal.getCommitmentResult(challengeId, challenges[challengeId].verifiers);
+            (losers, state) = commitReveal.getCommitmentResult(challengeId, challenges[challengeId].verifiers);
+            emit CommitmentRevealResult(losers, state);
+            if(state == 1) proofs[challengeId].isVerified = true;
+            for(i=0; i < challenges[challengeId].verifiers.length; i++) registry.incrementActorSlots(challenges[challengeId].verifiers[i]);
+            return (losers, state);
         }
         // -1 indicate the challenge still not timed-out.
-        return (losers, -1);
+        // free only who are not losers
+        for(i=0; i < challenges[challengeId].verifiers.length; i++){
+            for(j=0; j < losers.length; j++){
+                if(losers[j] != challenges[challengeId].verifiers[i]) registry.incrementActorSlots(challenges[challengeId].verifiers[i]);
+            }
+        }
+        emit CommitmentRevealResult(losers, -1);
+        return (new address[](0), -1);
     }
 
-    function getAvailableVerifiers() private view returns(address[]){
+    function getAvailableVerifiers() public view returns(address[]){
         return registry.getAvaliableRegistrants();
     }
 
@@ -148,17 +173,20 @@ contract VerifiersPool {
         address[] memory verifiersSet = getAvailableVerifiers();
         for(uint256 i=0; i< K; i++){
             challenges[challengeId].verifiers.push(verifiersSet[i]);
-            registry.decrementActorSlots(verifiersSet[i]);
         }
         return challenges[challengeId].verifiers.length;
     }
 
-    function isVerifiedProof(bytes32 proofId) public view onlyExistProof(proofId) returns(bool){
-        return proofs[proofId].isVerified;
+    function isVerifiedProof(bytes32 challengeId) public view onlyExistProof(challengeId) returns(bool){
+        return proofs[challengeId].isVerified;
     }
 
     function getChallengeOwner(bytes32 challengeId) public view onlyExistChallenge(challengeId) returns(address){
         return challenges[challengeId].owner;
     }
 
+    function isRegisteredVerifier(address verifier) public view returns(bool){
+        require(verifier != address(0), 'invalid gossiper address');
+        return registry.isActorRegistered(verifier);
+    }
 }

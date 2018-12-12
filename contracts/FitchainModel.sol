@@ -136,7 +136,7 @@ contract FitchainModel is FitchainStake {
 
     function setModelVerified(bytes32 modelId) public onlyValidatedModel(modelId) {
         for (uint256 i=0; i < models[modelId].verifiersPoolIds.length; i++){
-            (address[] memory losers, int8 state) = verifiersPool.endOfCommitRevealPhase(models[modelId].verifiersPoolIds[i]);
+            (address[] memory losers, int8 state) = verifiersPool.getCommitRevealResults(models[modelId].verifiersPoolIds[i]);
             // need to slash or take actions based on the revealed commits
             if(state == -1){
                 models[modelId].isVerified = false;
