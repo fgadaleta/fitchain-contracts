@@ -97,13 +97,25 @@ contract('VerifiersPool', (accounts) => {
             }
         })
         it('should get successful commmit-reveal result after reveal timeout', async () => {
+            // getRevealTimeout - currentTime and then sleep for this period of time.
             await utils.sleep(30000)
+            // check the result if commitment timedout
             if(await commitReveal.isCommitmentTimedout(challengeId)){
                 let result  = await verifiersPool.getCommitRevealResults(challengeId, { from: genesisAccount })
                 assert.strictEqual(web3.utils.toDecimal(result.logs[0].args.state), 1, 'invalid state: ' + state)
             }else{
                 console.log('error!')
             }
+        })
+        it('should get the challenge status verified', async () => {
+            assert.strictEqual(true, await verifiersPool.isVerifiedProof(challengeId), 'proof is not verified')
+        })
+        it('should able to deregister all verifiers', async() => {
+            for(i=0; i< verifiers.length; i++){
+                await verifiersPool.deregisterVerifier(verifiers[i], { from: genesisAccount })
+            }
+            const freedVerifiers = await verifiersPool.getAvailableVerifiers()
+            assert.strictEqual(freedVerifiers.length, 0, 'unable to free verifiers')
         })
     })
 })

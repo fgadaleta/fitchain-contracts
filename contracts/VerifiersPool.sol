@@ -109,6 +109,7 @@ contract VerifiersPool {
                 registry.decrementActorSlots(challenges[challengeId].verifiers[i]);
             }
             // now verifiers can start validation using
+            proofs[challengeId] = Proof(true, false);
             emit ChallengeInitialized(challengeId, challenges[challengeId].verifiers, challengeId, testingData, true);
             return true;
         }
@@ -132,12 +133,22 @@ contract VerifiersPool {
     function getCommitRevealResults(bytes32 challengeId) public returns(address[] , int8 ){
         address[] memory losers;
         int8 state;
+        uint256 i;
+        uint256 j;
         if (commitReveal.isCommitmentTimedout(challengeId)){
             (losers, state) = commitReveal.getCommitmentResult(challengeId, challenges[challengeId].verifiers);
             emit CommitmentRevealResult(losers, state);
+            if(state == 1) proofs[challengeId].isVerified = true;
+            for(i=0; i < challenges[challengeId].verifiers.length; i++) registry.incrementActorSlots(challenges[challengeId].verifiers[i]);
             return (losers, state);
         }
         // -1 indicate the challenge still not timed-out.
+        // free only who are not losers
+        for(i=0; i < challenges[challengeId].verifiers.length; i++){
+            for(j=0; j < losers.length; j++){
+                if(losers[j] != challenges[challengeId].verifiers[i]) registry.incrementActorSlots(challenges[challengeId].verifiers[i]);
+            }
+        }
         emit CommitmentRevealResult(losers, -1);
         return (new address[](0), -1);
     }
@@ -166,8 +177,8 @@ contract VerifiersPool {
         return challenges[challengeId].verifiers.length;
     }
 
-    function isVerifiedProof(bytes32 proofId) public view onlyExistProof(proofId) returns(bool){
-        return proofs[proofId].isVerified;
+    function isVerifiedProof(bytes32 challengeId) public view onlyExistProof(challengeId) returns(bool){
+        return proofs[challengeId].isVerified;
     }
 
     function getChallengeOwner(bytes32 challengeId) public view onlyExistChallenge(challengeId) returns(address){
