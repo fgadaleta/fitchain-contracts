@@ -22,6 +22,7 @@ contract('VerifiersPool', (accounts) => {
         let challengeId = utils.soliditySha3(['string'], ['MyFitchainVerifiersPool'])
         let testingData = utils.soliditySha3(['string'], ['this is testing data IPFS hash'])
         let failToDeregister
+        let wallTime = 100
 
         before(async () => {
             token = await FitchainToken.deployed()
@@ -53,9 +54,15 @@ contract('VerifiersPool', (accounts) => {
             assert.strictEqual(avaialableVerifiers.length, verifiers.length, 'invalid available verifiers number')
         })
         it('should able to initialize the verification challenge', async() => {
-            // initChallenge(bytes32 modelId, bytes32 challengeId, uint256 wallTime, uint256 kVerifiers, bytes32 testingData)
-            await verifiersPool.initChallenge(modelId, challengeId, 100, 3, testingData, { from: genesisAccount })
+            await verifiersPool.initChallenge(modelId, challengeId, wallTime, verifiers.length, testingData, { from: genesisAccount })
             assert.strictEqual(await verifiersPool.doesChallengeExist(challengeId), true, 'Challenge does not exist')
+        })
+        it('should start commit-reveal scheme', async () => {
+            let commitStarted
+            for(i=0; i< verifiers.length; i++){
+                commitStarted = await verifiersPool.startCommitRevealPhase(challengeId, { from: verifiers[i] })
+            }
+            assert.strictEqual(commitStarted.logs[0].args.challengeId, challengeId, 'unable to start commit-reveal phase')
         })
     })
 })

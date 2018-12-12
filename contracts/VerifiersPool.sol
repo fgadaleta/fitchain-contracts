@@ -41,7 +41,7 @@ contract VerifiersPool {
     CommitReveal private commitReveal;
 
     // events
-    event ChallengeInitialized(bytes32 challengeId, address[] verifiers, bytes32 proofId, bytes32 testingData);
+    event ChallengeInitialized(bytes32 challengeId, address[] verifiers, bytes32 proofId, bytes32 testingData, bool state);
     event CommitPhaseStarted(bytes32 challengeId, address[] verifiers);
 
     // modifiers
@@ -108,14 +108,15 @@ contract VerifiersPool {
                 registry.decrementActorSlots(challenges[challengeId].verifiers[i]);
             }
             // now verifiers can start validation using
-            emit ChallengeInitialized(challengeId, challenges[challengeId].verifiers, challengeId, testingData);
+            emit ChallengeInitialized(challengeId, challenges[challengeId].verifiers, challengeId, testingData, true);
             return true;
         }
+        emit ChallengeInitialized(challengeId, challenges[challengeId].verifiers, challengeId, testingData, false);
         return false;
 
     }
 
-    function endOfProcessingPhase(bytes32 challengeId) public onlyChallengeVerifiers(challengeId) onlyCanVoteOnce(challengeId) {
+    function startCommitRevealPhase(bytes32 challengeId) public onlyChallengeVerifiers(challengeId) onlyCanVoteOnce(challengeId) {
         voteOnce[challengeId][msg.sender] +=1;
         challenges[challengeId].canCommit +=1;
         if (challenges[challengeId].canCommit == challenges[challengeId].verifiers.length){
@@ -124,7 +125,7 @@ contract VerifiersPool {
         }
     }
 
-    function endOfCommitRevealPhase(bytes32 challengeId) public returns(address[] losers, int8 state){
+    function endCommitRevealPhase(bytes32 challengeId) public returns(address[] losers, int8 state){
         if (commitReveal.isCommitmentTimedout(challengeId)){
             return commitReveal.getCommitmentResult(challengeId, challenges[challengeId].verifiers);
         }
