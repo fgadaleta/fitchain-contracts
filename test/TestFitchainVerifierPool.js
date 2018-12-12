@@ -22,10 +22,11 @@ contract('VerifiersPool', (accounts) => {
         let challengeId = utils.soliditySha3(['string'], ['MyFitchainVerifiersPool'])
         let testingData = utils.soliditySha3(['string'], ['this is testing data IPFS hash'])
         let trainedModelResult = '{MSE: 0.002, accuracy: 0.9}'
-        let hash = utils.soliditySha3(['string'], [trainedModelResult])
+        let hash = utils.soliditySha3(['bool', 'string'], [true, trainedModelResult])
         let failToDeregister
         let wallTime = 100
         let revealVote
+        let losers, state 
 
         before(async () => {
             token = await FitchainToken.deployed()
@@ -85,6 +86,24 @@ contract('VerifiersPool', (accounts) => {
                 }
             }
             assert.strictEqual(unableToReveal, verifiers.length, 'unable to catch the error!')
+        })
+        it('should able to reveal after commit timeout', async() => {
+            await utils.sleep(30000)
+            const canReveal = await commitReveal.canReveal(challengeId)
+            assert.strictEqual(canReveal, true, 'can not reveal')
+            for(i=0; i < verifiers.length; i++){
+                revealVote = await commitReveal.reveal(challengeId, trainedModelResult, true, { from: verifiers[i] })
+                assert.strictEqual(challengeId, revealVote.logs[0].args.commitmentId, 'unable to call reveal vote')
+            }
+        })
+        it('should get successful commmit-reveal result after reveal timeout', async () => {
+            await utils.sleep(30000)
+            if(await commitReveal.isCommitmentTimedout(challengeId)){
+                let result  = await verifiersPool.getCommitRevealResults(challengeId, { from: genesisAccount })
+                assert.strictEqual(web3.utils.toDecimal(result.logs[0].args.state), 1, 'invalid state: ' + state)
+            }else{
+                console.log('error!')
+            }
         })
     })
 })

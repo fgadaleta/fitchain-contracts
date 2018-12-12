@@ -151,4 +151,8 @@ contract CommitReveal {
     function canReveal(bytes32 _commitmentId) public view returns(bool) {
         return (settings[_commitmentId].commitTimeout <= block.timestamp);
     }
+    function getCommitRevealResult(bytes32 _commitmentId) public view returns(address[], int8) {
+        if(results[_commitmentId].state) return (results[_commitmentId].losers, 1);
+        return (results[_commitmentId].losers, 0);
+    }
 }

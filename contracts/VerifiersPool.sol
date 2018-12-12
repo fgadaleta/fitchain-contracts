@@ -43,6 +43,7 @@ contract VerifiersPool {
     // events
     event ChallengeInitialized(bytes32 challengeId, address[] verifiers, bytes32 proofId, bytes32 testingData, bool state);
     event CommitPhaseStarted(bytes32 challengeId, address[] verifiers, bool state);
+    event CommitmentRevealResult(address[] losers, int8 state);
 
     // modifiers
     modifier onlyChallengeVerifiers(bytes32 challengeId){
@@ -128,12 +129,17 @@ contract VerifiersPool {
         return false;
     }
 
-    function endCommitRevealPhase(bytes32 challengeId) public returns(address[] losers, int8 state){
+    function getCommitRevealResults(bytes32 challengeId) public returns(address[] , int8 ){
+        address[] memory losers;
+        int8 state;
         if (commitReveal.isCommitmentTimedout(challengeId)){
-            return commitReveal.getCommitmentResult(challengeId, challenges[challengeId].verifiers);
+            (losers, state) = commitReveal.getCommitmentResult(challengeId, challenges[challengeId].verifiers);
+            emit CommitmentRevealResult(losers, state);
+            return (losers, state);
         }
         // -1 indicate the challenge still not timed-out.
-        return (losers, -1);
+        emit CommitmentRevealResult(losers, -1);
+        return (new address[](0), -1);
     }
 
     function getAvailableVerifiers() public view returns(address[]){
