@@ -25,6 +25,7 @@ contract('VerifiersPool', (accounts) => {
         let hash = utils.soliditySha3(['string'], [trainedModelResult])
         let failToDeregister
         let wallTime = 100
+        let revealVote
 
         before(async () => {
             token = await FitchainToken.deployed()
@@ -72,6 +73,18 @@ contract('VerifiersPool', (accounts) => {
                 committedVote = await commitReveal.commit(challengeId, hash, { from: verifiers[i]})
                 assert.strictEqual(committedVote.logs[0].args.voter, verifiers[i], 'unable to commit vote')
             }
+        })
+        it('unable to reveal during the commit phase', async() => {
+            let unableToReveal = 0
+            for(i=0; i<verifiers.length; i++){
+                // reveal(bytes32 _commitmentId, string _value, bool _vote)
+                try{
+                    revealVote = await commitReveal.reveal(challengeId, trainedModelResult, true, { from: verifiers[i] })
+                }catch(error){
+                    unableToReveal +=1
+                }
+            }
+            assert.strictEqual(unableToReveal, verifiers.length, 'unable to catch the error!')
         })
     })
 })
