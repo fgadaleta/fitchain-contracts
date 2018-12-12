@@ -23,10 +23,9 @@ contract('VerifiersPool', (accounts) => {
         let testingData = utils.soliditySha3(['string'], ['this is testing data IPFS hash'])
         let trainedModelResult = '{MSE: 0.002, accuracy: 0.9}'
         let hash = utils.soliditySha3(['bool', 'string'], [true, trainedModelResult])
-        let failToDeregister
         let wallTime = 100
         let revealVote
-        let losers, state 
+        let state
 
         before(async () => {
             token = await FitchainToken.deployed()
@@ -57,41 +56,41 @@ contract('VerifiersPool', (accounts) => {
             const avaialableVerifiers = await verifiersPool.getAvailableVerifiers()
             assert.strictEqual(avaialableVerifiers.length, verifiers.length, 'invalid available verifiers number')
         })
-        it('should able to initialize the verification challenge', async() => {
+        it('should able to initialize the verification challenge', async () => {
             await verifiersPool.initChallenge(modelId, challengeId, wallTime, verifiers.length, testingData, { from: genesisAccount })
             assert.strictEqual(await verifiersPool.doesChallengeExist(challengeId), true, 'Challenge does not exist')
         })
         it('should start commit-reveal scheme', async () => {
             let commitStarted
-            for(i=0; i< verifiers.length; i++){
+            for (i = 0; i < verifiers.length; i++) {
                 commitStarted = await verifiersPool.startCommitRevealPhase(challengeId, { from: verifiers[i] })
             }
             assert.strictEqual(commitStarted.logs[0].args.challengeId, challengeId, 'unable to start commit-reveal phase')
         })
-        it('should verifiers commit their votes?', async() => {
+        it('should verifiers commit their votes?', async () => {
             let committedVote
-            for(i=0; i< verifiers.length; i++){
-                committedVote = await commitReveal.commit(challengeId, hash, { from: verifiers[i]})
+            for (i = 0; i < verifiers.length; i++) {
+                committedVote = await commitReveal.commit(challengeId, hash, { from: verifiers[i] })
                 assert.strictEqual(committedVote.logs[0].args.voter, verifiers[i], 'unable to commit vote')
             }
         })
-        it('unable to reveal during the commit phase', async() => {
+        it('unable to reveal during the commit phase', async () => {
             let unableToReveal = 0
-            for(i=0; i<verifiers.length; i++){
+            for (i = 0; i < verifiers.length; i++) {
                 // reveal(bytes32 _commitmentId, string _value, bool _vote)
-                try{
+                try {
                     revealVote = await commitReveal.reveal(challengeId, trainedModelResult, true, { from: verifiers[i] })
-                }catch(error){
-                    unableToReveal +=1
+                } catch (error) {
+                    unableToReveal += 1
                 }
             }
             assert.strictEqual(unableToReveal, verifiers.length, 'unable to catch the error!')
         })
-        it('should able to reveal after commit timeout', async() => {
+        it('should able to reveal after commit timeout', async () => {
             await utils.sleep(30000)
             const canReveal = await commitReveal.canReveal(challengeId)
             assert.strictEqual(canReveal, true, 'can not reveal')
-            for(i=0; i < verifiers.length; i++){
+            for (i = 0; i < verifiers.length; i++) {
                 revealVote = await commitReveal.reveal(challengeId, trainedModelResult, true, { from: verifiers[i] })
                 assert.strictEqual(challengeId, revealVote.logs[0].args.commitmentId, 'unable to call reveal vote')
             }
@@ -100,18 +99,18 @@ contract('VerifiersPool', (accounts) => {
             // getRevealTimeout - currentTime and then sleep for this period of time.
             await utils.sleep(30000)
             // check the result if commitment timedout
-            if(await commitReveal.isCommitmentTimedout(challengeId)){
-                let result  = await verifiersPool.getCommitRevealResults(challengeId, { from: genesisAccount })
+            if (await commitReveal.isCommitmentTimedout(challengeId)) {
+                let result = await verifiersPool.getCommitRevealResults(challengeId, { from: genesisAccount })
                 assert.strictEqual(web3.utils.toDecimal(result.logs[0].args.state), 1, 'invalid state: ' + state)
-            }else{
+            } else {
                 console.log('error!')
             }
         })
         it('should get the challenge status verified', async () => {
             assert.strictEqual(true, await verifiersPool.isVerifiedProof(challengeId), 'proof is not verified')
         })
-        it('should able to deregister all verifiers', async() => {
-            for(i=0; i< verifiers.length; i++){
+        it('should able to deregister all verifiers', async () => {
+            for (i = 0; i < verifiers.length; i++) {
                 await verifiersPool.deregisterVerifier(verifiers[i], { from: genesisAccount })
             }
             const freedVerifiers = await verifiersPool.getAvailableVerifiers()
