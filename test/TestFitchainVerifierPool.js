@@ -21,6 +21,8 @@ contract('VerifiersPool', (accounts) => {
         let modelId = utils.soliditySha3(['string'], ['simple model id'])
         let challengeId = utils.soliditySha3(['string'], ['MyFitchainVerifiersPool'])
         let testingData = utils.soliditySha3(['string'], ['this is testing data IPFS hash'])
+        let trainedModelResult = '{MSE: 0.002, accuracy: 0.9}'
+        let hash = utils.soliditySha3(['string'], [trainedModelResult])
         let failToDeregister
         let wallTime = 100
 
@@ -63,6 +65,13 @@ contract('VerifiersPool', (accounts) => {
                 commitStarted = await verifiersPool.startCommitRevealPhase(challengeId, { from: verifiers[i] })
             }
             assert.strictEqual(commitStarted.logs[0].args.challengeId, challengeId, 'unable to start commit-reveal phase')
+        })
+        it('should verifiers commit their votes?', async() => {
+            let committedVote
+            for(i=0; i< verifiers.length; i++){
+                committedVote = await commitReveal.commit(challengeId, hash, { from: verifiers[i]})
+                assert.strictEqual(committedVote.logs[0].args.voter, verifiers[i], 'unable to commit vote')
+            }
         })
     })
 })
