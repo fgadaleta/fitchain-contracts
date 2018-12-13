@@ -9,7 +9,7 @@ import './VerifiersPool.sol';
 @author Team: Fitchain Team
 */
 
-contract FitchainModel is FitchainStake {
+contract FitchainModel {
 
     // fitchain model
     struct Model {
@@ -32,6 +32,7 @@ contract FitchainModel is FitchainStake {
     uint256 private minStake;
     GossipersPool private gossipersPool;
     VerifiersPool private verifiersPool;
+    FitchainStake private stake;
 
 
     //events
@@ -66,15 +67,17 @@ contract FitchainModel is FitchainStake {
         _;
     }
 
-    constructor(uint256 _minStake, address _gossiperContractAddress, address _verifierContractAddress) public {
+    constructor(uint256 _minStake, address _gossiperContractAddress, address _verifierContractAddress, address _stakingAddress) public {
         require(_gossiperContractAddress != address(0) && _verifierContractAddress != address(0), 'invalid gossiper contract address');
+        require(_stakingAddress != address(0), 'invalid staking contract address');
         gossipersPool = GossipersPool(_gossiperContractAddress);
         verifiersPool = VerifiersPool(_verifierContractAddress);
+        stake = FitchainStake(_stakingAddress);
         minStake = _minStake;
     }
 
     function createModel(bytes32 modelId, bytes32 paymentRecieptId, uint256 m, uint256 n) public notExist(modelId) returns(bool) {
-        if(super.stake(modelId, msg.sender, minStake)){
+        if(stake.stake(modelId, msg.sender, minStake)){
             models[modelId] = Model(true, false, false, 0,n, 0, msg.sender, bytes32(0), paymentRecieptId, bytes32(0), new bytes32[](0), new bytes(0), new string(0));
             // start goisspers channel
             gossipersPool.initChannel(modelId, n, m, address(this));
@@ -102,7 +105,7 @@ contract FitchainModel is FitchainStake {
     }
 
     function releaseModelStake(bytes32 modelId) public onlyVerifiedModel(modelId) returns(bool) {
-        super.release(modelId, models[modelId].owner, minStake);
+        stake.release(modelId, models[modelId].owner, minStake);
         emit StakeReleased(modelId, models[modelId].owner, minStake);
         return true;
     }
@@ -144,7 +147,7 @@ contract FitchainModel is FitchainStake {
             }
             if(state == 0){
                 // slash Data-compute provider
-                super.slash(modelId, models[modelId].owner, minStake);
+                stake.slash(modelId, models[modelId].owner, minStake);
                 for(uint256 j=0; j < losers.length; j++){
                     //slash verifiers (losers only)
                     verifiersPool.slashVerifier(models[modelId].verifiersPoolIds[i], losers[j]);
