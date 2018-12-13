@@ -34,4 +34,5 @@ before_script:
 script:
 - npm run lint:solium
 - npm run test
+- npm run test:cover
 - npm run migrate
