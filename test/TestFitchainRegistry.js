@@ -21,9 +21,9 @@ contract('FitchainRegistry', (accounts) => {
         let amount = 100 // tokens per slot
         let stakeId
         before(async () => {
-            token = await FitchainToken.deployed()
-            staking = await FitchainStake.deployed()
-            registry = await Registry.deployed()
+            token = await FitchainToken.new()
+            staking = await FitchainStake.new(token.address)
+            registry = await Registry.new(staking.address)
 
             // registrant 1 & 2 buy tokens from genesis account
             await token.transfer(registrant1Addr, (slots * amount) + 1, { from: genesisAccount })
@@ -36,7 +36,7 @@ contract('FitchainRegistry', (accounts) => {
             assert.strictEqual((slots * amount) + 1, web3.utils.toDecimal(await token.balanceOf(registrant2Addr)), 'invalid amount of tokens registrant 2')
         })
 
-        it('register an actor with as stake of 3 slots, 100 token per slot', async () => {
+        it('should register an actor with as stake of 3 slots, 100 token per slot', async () => {
             // registrants approve the stake before registration
             await token.approve(staking.address, (slots * amount), { from: registrant1Addr })
             await token.approve(staking.address, (slots * amount), { from: registrant2Addr })
@@ -50,13 +50,13 @@ contract('FitchainRegistry', (accounts) => {
             const actors = await registry.getAvaliableRegistrants()
             assert.strictEqual(2, actors.length, 'invalid number of actors')
         })
-        it('for each actor check assert the number of free slots', async () => {
+        it('should for each actor check assert the number of free slots', async () => {
             const actor1Slots = await registry.getActorFreeSlots(registrant1Addr)
             const actor2Slots = await registry.getActorFreeSlots(registrant2Addr)
             assert.strictEqual(3, actor1Slots.toNumber(), 'invalid slots number')
             assert.strictEqual(3, actor2Slots.toNumber(), 'invalid slots number')
         })
-        it('book 2 slots from each actor', async () => {
+        it('should book 2 slots from each actor', async () => {
             await registry.decrementActorSlots(registrant1Addr, { from: genesisAccount })
             await registry.decrementActorSlots(registrant2Addr, { from: genesisAccount })
             const actor1Slots = await registry.getActorFreeSlots(registrant1Addr)
@@ -76,14 +76,14 @@ contract('FitchainRegistry', (accounts) => {
                 return error
             }
         })
-        it('slash the first registrant', async () => {
+        it('should slash the first registrant', async () => {
             await registry.slashActor(stakeId, registrant1Addr, amount, true, { from: genesisAccount })
             const actor1MaxSlots = await registry.getActorMaxSlots(registrant1Addr)
             assert.strictEqual(2, actor1MaxSlots.toNumber(), 'invalid max number of slots')
             const actor1Stake = await staking.getStakebyActor(stakeId, registrant1Addr)
             assert.strictEqual(200, actor1Stake.toNumber(), 'invalid stake amount')
         })
-        it('increment and deregister actors', async () => {
+        it('should increment and deregister actors', async () => {
             await registry.incrementActorSlots(registrant1Addr, { from: genesisAccount })
             const actor1CurSlots = await registry.getActorFreeSlots(registrant1Addr)
             const actor1MaxSlots = await registry.getActorMaxSlots(registrant1Addr)
@@ -94,7 +94,7 @@ contract('FitchainRegistry', (accounts) => {
             assert.strictEqual(false, await registry.isActorRegistered(registrant1Addr), 'actor already exist')
             assert.strictEqual(false, await registry.isActorRegistered(registrant2Addr), 'actor already exist')
         })
-        it('assert the released stake of actors', async () => {
+        it('should assert the released stake of actors', async () => {
             assert.strictEqual(201, web3.utils.toDecimal(await token.balanceOf(registrant1Addr)), 'invalid available tokens')
             assert.strictEqual(301, web3.utils.toDecimal(await token.balanceOf(registrant2Addr)), 'invalid available tokens')
         })

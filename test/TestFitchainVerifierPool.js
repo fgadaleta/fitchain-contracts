@@ -4,6 +4,7 @@ const FitchainToken = artifacts.require('FitchainToken.sol')
 const FitchainStake = artifacts.require('FitchainStake.sol')
 const VerifiersPool = artifacts.require('VerifiersPool.sol')
 const CommitReveal = artifacts.require('CommitReveal.sol')
+const Registry = artifacts.require('FitchainRegistry.sol')
 
 const utils = require('./utils.js')
 
@@ -11,7 +12,7 @@ const web3 = utils.getWeb3()
 
 contract('VerifiersPool', (accounts) => {
     describe('Test Verifiers Pool in Fitchain', () => {
-        let token, i
+        let token, i, registry
         let staking, verifiersPool, commitReveal, genesisBalance
         let totalSupply
         let genesisAccount = accounts[0]
@@ -28,10 +29,17 @@ contract('VerifiersPool', (accounts) => {
         let state
 
         before(async () => {
-            token = await FitchainToken.deployed()
-            staking = await FitchainStake.deployed()
-            verifiersPool = await VerifiersPool.deployed()
-            commitReveal = await CommitReveal.deployed()
+            const minKVerifiers = 3
+            const minStake = 10
+            const commitTimeout = 20
+            const revealTimeout = 20
+
+            token = await FitchainToken.new()
+            staking = await FitchainStake.new(token.address)
+            registry = await Registry.new(staking.address)
+            commitReveal = await CommitReveal.new()
+            verifiersPool = await VerifiersPool.new(minKVerifiers, minStake, commitTimeout, revealTimeout, commitReveal.address, registry.address)
+            
 
             // init verifiers wallets
             for (i = 0; i < verifiers.length; i++) {

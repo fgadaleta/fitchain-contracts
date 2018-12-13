@@ -16,7 +16,7 @@ contract('FitchainToken', (accounts) => {
         const receiver2 = accounts[2]
 
         before(async () => {
-            token = await FitchainToken.deployed()
+            token = await FitchainToken.new()
         })
 
         it('should get the same total supply', async () => {
