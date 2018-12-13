@@ -1,7 +1,7 @@
 [![banner](docs/imgs/fitchain-banner.png)](https://fitchain.io)
 # Fitchain contracts
 
-![Fitchain Travis](https://travis-ci.com/aabdulwahed/fitchain-contracts.svg?branch=master)
+![Fitchain Travis](https://travis-ci.com/fitchain/fitchain-contracts.svg?branch=master)
 
 Fitchain [contracts](docs/ContractsStructure.md) implements the following modules:
 - Gossipers channel for proof of training
