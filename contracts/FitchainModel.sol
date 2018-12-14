@@ -68,7 +68,8 @@ contract FitchainModel {
     }
 
     constructor(uint256 _minStake, address _gossiperContractAddress, address _verifierContractAddress, address _stakingAddress) public {
-        require(_gossiperContractAddress != address(0) && _verifierContractAddress != address(0), 'invalid gossiper contract address');
+        require(_gossiperContractAddress != address(0), 'invalid gossiper contract address');
+        require(_verifierContractAddress != address(0), 'invalid verifier contract address');
         require(_stakingAddress != address(0), 'invalid staking contract address');
         gossipersPool = GossipersPool(_gossiperContractAddress);
         verifiersPool = VerifiersPool(_verifierContractAddress);
