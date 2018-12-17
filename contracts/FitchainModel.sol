@@ -111,7 +111,7 @@ contract FitchainModel {
         return true;
     }
 
-    function isModelValidated(bytes32 modelId) public view onlyExist(modelId) returns(bool){
+    function isModelTrained(bytes32 modelId) public view onlyExist(modelId) returns(bool){
         return models[modelId].isTrained;
     }
 
@@ -131,9 +131,8 @@ contract FitchainModel {
         return models[modelId].verifiersPoolIds.length;
     }
 
-    function setModelTrained(bytes32 modelId) public returns(bool) {
-        bytes32 proofId = gossipersPool.getProofIdByChannelId(modelId);
-        require(gossipersPool.isValidProof(proofId), 'Proof is not valid');
+    function setModelTrained(bytes32 modelId) public onlyModelOwner(modelId) returns(bool) {
+        require(gossipersPool.isValidProof(modelId), 'Proof is not valid');
         gossipersPool.terminateChannel(modelId);
         models[modelId].isTrained = true;
     }

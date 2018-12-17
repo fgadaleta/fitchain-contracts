@@ -27,7 +27,7 @@ contract FitchainPayment {
     mapping(bytes32 => Payment) payments;
 
     modifier onlyValidModel(bytes32 modelId){
-        require(model.isModelValidated(modelId) && model.isModelVerified(modelId), 'invalid model state');
+        require(model.isModelTrained(modelId) && model.isModelVerified(modelId), 'invalid model state');
         _;
     }
 

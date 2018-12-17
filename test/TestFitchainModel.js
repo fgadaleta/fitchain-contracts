@@ -36,6 +36,9 @@ contract('FitchainModel', (accounts) => {
         let dataAssetId = utils.soliditySha3(['string'], ['asset'])
         let wallTime = 3600
         let minWallTime = 300
+        let createdModel
+        let eot = 'THIS IS FAKE END OF TRAINING!'
+        let proof
 
         before(async () => {
             token = await FitchainToken.new()
@@ -84,9 +87,27 @@ contract('FitchainModel', (accounts) => {
         })
         it('should data owner call creat model and stake on it', async() => {
             await token.approve(stake.address, minModelStake, { from: dataOwner })
-            const createModel = await model.createModel(modelId, modelId, minKVerifiers, minKVerifiers, { from: dataOwner })
+            createdModel = await model.createModel(modelId, modelId, minKVerifiers, minKVerifiers, { from: dataOwner })
             assert.strictEqual(((2 * amount) - minModelStake), web3.utils.toDecimal(await token.balanceOf(dataOwner)))
-            assert.strictEqual(createModel.logs[0].args.modelId, modelId, 'unable to init model');
+            assert.strictEqual(createdModel.logs[0].args.modelId, modelId, 'unable to init model');
+        })
+        it('should elected gossipers listen and commit their votes', async() => {
+            // submit proof of training
+            const merkleRoot = [utils.soliditySha3(['string'], ['trx1']), utils.soliditySha3(['string'], ['trx2']), utils.soliditySha3(['string'], ['trx3'])]
+            const result = utils.soliditySha3(['string'], ['results'])
+            // modelId, merkleroot, eot, result
+            const hash = utils.createHash(web3, modelId, merkleRoot, eot, result)
+            for (i = 0; i < gossipers.length; i++) {
+                signature = await web3.eth.sign(hash, gossipers[i])
+                proof = await gossipersPool.submitProof(modelId, eot, merkleRoot, signature, result, { from: gossipers[i] })
+                assert.strictEqual(proof.logs[0].args.proofId, await gossipersPool.getProofIdByChannelId(modelId), 'invalid proof Id')
+            }
+        })
+        it('should set model trained true if reach the total number of gossiper votes', async() => {
+            await gossipersPool.validateProof(modelId, { from: dataOwner })
+            assert.strictEqual(await gossipersPool.isValidProof(modelId), true, 'invalid proof')
+            await model.setModelTrained(modelId, { from: dataOwner })
+            assert.strictEqual(await model.isModelTrained(modelId), true, 'Model is not trained')
         })
     })
 })
