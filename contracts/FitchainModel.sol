@@ -9,7 +9,7 @@ import './VerifiersPool.sol';
 @author Team: Fitchain Team
 */
 
-contract FitchainModel is FitchainStake {
+contract FitchainModel {
 
     // fitchain model
     struct Model {
@@ -20,11 +20,11 @@ contract FitchainModel is FitchainStake {
         uint256 kVerifiers;
         uint256 format;
         address owner;
-        bytes32 location;
+        string location;
         bytes32 paymentId;
         bytes32 gossipersPoolId;
         bytes32[] verifiersPoolIds;
-        bytes inputSignature;
+        string inputSignature;
         string modelType;
     }
 
@@ -32,12 +32,14 @@ contract FitchainModel is FitchainStake {
     uint256 private minStake;
     GossipersPool private gossipersPool;
     VerifiersPool private verifiersPool;
+    FitchainStake private stake;
 
 
     //events
     event ModelCreated(bytes32 modelId, address owner, bool state);
     event StakeReleased(bytes32 modelId, address to, uint256 amount);
-    event ModelPublished(bytes32 modelId, bytes32 location, uint256 format, string modelType, bytes inputSignature);
+    event ModelPublished(bytes32 modelId, string location, uint256 format, string modelType, string inputSignature);
+    event ModelVerificationStarted(bytes32 modelId, uint256 kVerifiers, bool state);
 
     modifier notExist(bytes32 modelId){
         require(!models[modelId].exist, 'Model already exist');
@@ -55,7 +57,8 @@ contract FitchainModel is FitchainStake {
     }
 
     modifier onlyValidatedModel(bytes32 modelId){
-        require(models[modelId].location != bytes32(0), 'model not exists');
+        bytes memory tempLocationBytes = bytes(models[modelId].location);
+        require(tempLocationBytes.length != 0, 'model not exists');
         require(models[modelId].isTrained, 'Model is not trained yet!');
         require(gossipersPool.getChannelOwner(modelId) == address(this), 'invalid channel owner');
         _;
@@ -66,16 +69,20 @@ contract FitchainModel is FitchainStake {
         _;
     }
 
-    constructor(uint256 _minStake, address _gossiperContractAddress, address _verifierContractAddress) public {
-        require(_gossiperContractAddress != address(0) && _verifierContractAddress != address(0), 'invalid gossiper contract address');
+    constructor(uint256 _minStake, address _gossiperContractAddress, address _verifierContractAddress, address _stakingAddress) public {
+        require(_gossiperContractAddress != address(0), 'invalid gossiper contract address');
+        require(_verifierContractAddress != address(0), 'invalid verifier contract address');
+        require(_stakingAddress != address(0), 'invalid staking contract address');
         gossipersPool = GossipersPool(_gossiperContractAddress);
         verifiersPool = VerifiersPool(_verifierContractAddress);
+        stake = FitchainStake(_stakingAddress);
         minStake = _minStake;
     }
 
     function createModel(bytes32 modelId, bytes32 paymentRecieptId, uint256 m, uint256 n) public notExist(modelId) returns(bool) {
-        if(super.stake(modelId, msg.sender, minStake)){
-            models[modelId] = Model(true, false, false, 0,n, 0, msg.sender, bytes32(0), paymentRecieptId, bytes32(0), new bytes32[](0), new bytes(0), new string(0));
+        // needs to verify consumer signature when create new model
+        if(stake.stake(modelId, msg.sender, minStake)){
+            models[modelId] = Model(true, false, false, 0,n, 0, msg.sender, new string(0), paymentRecieptId, bytes32(0), new bytes32[](0), new string(0), new string(0));
             // start goisspers channel
             gossipersPool.initChannel(modelId, n, m, address(this));
             emit ModelCreated(modelId, msg.sender, true);
@@ -86,7 +93,7 @@ contract FitchainModel is FitchainStake {
 
     }
 
-    function publishModel(bytes32 modelId, bytes32 _location, uint256 _format, string _modelType, bytes _inputSignature) public onlyModelOwner(modelId) returns(bool) {
+    function publishModel(bytes32 modelId, string _location, uint256 _format, string _modelType, string _inputSignature) public onlyModelOwner(modelId) returns(bool) {
         models[modelId].location = _location;
         models[modelId].format = _format;
         models[modelId].modelType = _modelType;
@@ -95,19 +102,21 @@ contract FitchainModel is FitchainStake {
         return true;
     }
 
-    function verifyModel(bytes32 modelId, bytes32 challengId, uint256 kVerifiers, uint256 wallTime, bytes32 testingData) public onlyValidatedModel(modelId) onlyModelOwner(modelId) returns(bool){
+    function verifyModel(bytes32 modelId, uint256 kVerifiers, uint256 wallTime, bytes32 testingData) public onlyValidatedModel(modelId) onlyModelOwner(modelId) returns(bool){
         models[modelId].kVerifiers = kVerifiers;
         //init verification pool
-        verifiersPool.initChallenge(modelId, challengId, wallTime, kVerifiers, testingData);
+        require(verifiersPool.initChallenge(modelId, modelId, wallTime, kVerifiers, testingData), 'unable to initialize challenge');
+        emit ModelVerificationStarted(modelId, kVerifiers, true);
+        return true;
     }
 
     function releaseModelStake(bytes32 modelId) public onlyVerifiedModel(modelId) returns(bool) {
-        super.release(modelId, models[modelId].owner, minStake);
+        stake.release(modelId, models[modelId].owner, minStake);
         emit StakeReleased(modelId, models[modelId].owner, minStake);
         return true;
     }
 
-    function isModelValidated(bytes32 modelId) public view onlyExist(modelId) returns(bool){
+    function isModelTrained(bytes32 modelId) public view onlyExist(modelId) returns(bool){
         return models[modelId].isTrained;
     }
 
@@ -127,9 +136,8 @@ contract FitchainModel is FitchainStake {
         return models[modelId].verifiersPoolIds.length;
     }
 
-    function setModelTrained(bytes32 modelId) public returns(bool) {
-        bytes32 proofId = gossipersPool.getProofIdByChannelId(modelId);
-        require(gossipersPool.isValidProof(proofId), 'Proof is not valid');
+    function setModelTrained(bytes32 modelId) public onlyModelOwner(modelId) returns(bool) {
+        require(gossipersPool.isValidProof(modelId), 'Proof is not valid');
         gossipersPool.terminateChannel(modelId);
         models[modelId].isTrained = true;
     }
@@ -144,7 +152,7 @@ contract FitchainModel is FitchainStake {
             }
             if(state == 0){
                 // slash Data-compute provider
-                super.slash(modelId, models[modelId].owner, minStake);
+                stake.slash(modelId, models[modelId].owner, minStake);
                 for(uint256 j=0; j < losers.length; j++){
                     //slash verifiers (losers only)
                     verifiersPool.slashVerifier(models[modelId].verifiersPoolIds[i], losers[j]);

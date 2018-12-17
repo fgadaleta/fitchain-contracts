@@ -39,7 +39,6 @@ contract('VerifiersPool', (accounts) => {
             registry = await Registry.new(staking.address)
             commitReveal = await CommitReveal.new()
             verifiersPool = await VerifiersPool.new(minKVerifiers, minStake, commitTimeout, revealTimeout, commitReveal.address, registry.address)
-            
 
             // init verifiers wallets
             for (i = 0; i < verifiers.length; i++) {

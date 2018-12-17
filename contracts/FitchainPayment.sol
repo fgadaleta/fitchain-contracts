@@ -8,7 +8,7 @@ import './FitchainModel.sol';
 @author Team: Fitchain Team
 */
 
-contract FitchainPayment is FitchainToken {
+contract FitchainPayment {
 
     struct Payment{
         bool exists;
@@ -20,12 +20,14 @@ contract FitchainPayment is FitchainToken {
     }
 
     FitchainModel private model;
+    FitchainToken private token;
+
     uint256 private MIN_TIMEOUT;
     // ModelId == PaymentId --> payment
     mapping(bytes32 => Payment) payments;
 
     modifier onlyValidModel(bytes32 modelId){
-        require(model.isModelValidated(modelId) && model.isModelVerified(modelId), 'invalid model state');
+        require(model.isModelTrained(modelId) && model.isModelVerified(modelId), 'invalid model state');
         _;
     }
 
@@ -34,9 +36,11 @@ contract FitchainPayment is FitchainToken {
     event PaymentReleased(bytes32 Id, address reciever, uint256 amount);
     event PaymentRefunded(bytes32 Id, address reciever, uint256 amount);
 
-    constructor(address _modelContractAddress, uint256 _minTimeout) public{
+    constructor(address _modelContractAddress, uint256 _minTimeout, address _tokenAddress) public{
         require(_modelContractAddress != address(0), 'invalid contract address');
+        require(_tokenAddress != address(0), 'invalid token address');
         model = FitchainModel(_modelContractAddress);
+        token = FitchainToken(_tokenAddress);
         MIN_TIMEOUT = _minTimeout;
     }
 
@@ -45,13 +49,13 @@ contract FitchainPayment is FitchainToken {
         require(amount > 0, 'invalid payment amount');
         require(timeout >= MIN_TIMEOUT, 'invalid');
         payments[paymentId] = Payment(true, amount, timeout, msg.sender, reciever, asset);
-        require(super.transferFrom(msg.sender, address(this), amount));
+        require(token.transferFrom(msg.sender, address(this), amount));
         emit PaymentLocked(paymentId, msg.sender, reciever, amount, asset);
         return true;
     }
 
     function releasePayment(bytes32 paymentId) public onlyValidModel(paymentId) returns(bool){
-        super.transfer(payments[paymentId].reciever, payments[paymentId].amount);
+        token.transfer(payments[paymentId].reciever, payments[paymentId].amount);
         emit PaymentReleased(paymentId,  payments[paymentId].reciever, payments[paymentId].amount);
         return true;
     }
@@ -59,7 +63,7 @@ contract FitchainPayment is FitchainToken {
     function refundPayment(bytes32 paymentId) public returns(bool){
         // not secure block timestamp
         require(payments[paymentId].timeout >= block.timestamp, 'invalid timeout!');
-        super.transfer(payments[paymentId].sender, payments[paymentId].amount);
+        token.transfer(payments[paymentId].sender, payments[paymentId].amount);
         emit PaymentRefunded(paymentId, payments[paymentId].sender, payments[paymentId].amount);
         return true;
 
