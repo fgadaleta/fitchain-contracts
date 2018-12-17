@@ -1,4 +1,5 @@
 module.exports = {
-    testCommand: 'export PORT=8555&& npm run test -- --network development --timeout 100000',
+    compileCommand: 'npm run compile -- --all',
+    testCommand: 'export PORT=8555&& npm run test -- --network coverage --timeout 100000',
     copyPackages: ['openzeppelin-solidity'],
 }

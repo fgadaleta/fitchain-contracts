@@ -38,4 +38,4 @@ script:
 - npm run migrate
 
 after_script:
-  - npm run coverage && cat coverage/lcov.info | coveralls
+  - npm run coverage
