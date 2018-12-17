@@ -34,8 +34,9 @@ before_script:
 
 script:
 - npm run lint:solium
+- npm run lint:eslint
 - npm run test
 - npm run migrate
 
-#after_script:
-#  - npm run coverage && cat coverage/lcov.info | coveralls
+after_script:
+  - npm run coverage
