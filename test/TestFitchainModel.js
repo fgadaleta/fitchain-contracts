@@ -42,7 +42,7 @@ contract('FitchainModel', (accounts) => {
         let modelLocation = 'QmWVZ87MXAwt5wvgsM9akHUnGE5K3SRSKMmkQtPXRsrPUk' // ipfs hash
         let modelFormat = 0 // csv file
         let modelType = 'collection'
-        let modelInputSignature ='hgGDH7843hjds'
+        let modelInputSignature = 'hgGDH7843hjds'
         let testingDataId = utils.soliditySha3(['string'], ['testing data for verification game'])
         // model verification challenge
         let trainedModelResult = '{MSE: 0.002, accuracy: 0.9}'
@@ -50,7 +50,7 @@ contract('FitchainModel', (accounts) => {
 
         before(async () => {
             token = await FitchainToken.new()
-            //payment = await Payment.new(token.address)
+            // payment = await Payment.new(token.address)
             stake = await FitchainStake.new(token.address)
             registry = await Registry.new(stake.address)
             commitReveal = await CommitReveal.new()
@@ -61,21 +61,20 @@ contract('FitchainModel', (accounts) => {
             totalSupply = await token.totalSupply()
             genesisBalance = web3.utils.toDecimal(await token.balanceOf(genesisAccount))
             // transfer tokens to verifiers, gossipers, data owner, data scientist
-            for(i=0; i < verifiers.length; i++){
+            for (i = 0; i < verifiers.length; i++) {
                 await token.transfer(verifiers[i], (slots * amount) + 1, { from: genesisAccount })
                 assert.strictEqual((slots * amount) + 1, web3.utils.toDecimal(await token.balanceOf(verifiers[i])), 'invalid amount of tokens registrant ' + verifiers[i])
             }
-            for(i=0; i < gossipers.length; i++){
+            for (i = 0; i < gossipers.length; i++) {
                 await token.transfer(gossipers[i], (slots * amount) + 1, { from: genesisAccount })
                 assert.strictEqual((slots * amount) + 1, web3.utils.toDecimal(await token.balanceOf(gossipers[i])), 'invalid amount of tokens registrant ' + gossipers[i])
-
             }
             await token.transfer(dataScientist, 2 * amount, { from: genesisAccount })
             assert.strictEqual((2 * amount), web3.utils.toDecimal(await token.balanceOf(dataScientist)), 'invalid amount of tokens registrant ' + dataScientist)
             await token.transfer(dataOwner, 2 * amount, { from: genesisAccount })
             assert.strictEqual((2 * amount), web3.utils.toDecimal(await token.balanceOf(dataOwner)), 'invalid amount of tokens registrant ' + dataOwner)
         })
-        it('should register verifiers and gossipers', async() => {
+        it('should register verifiers and gossipers', async () => {
             for (i = 0; i < verifiers.length; i++) {
                 await token.approve(stake.address, (slots * amount), { from: verifiers[i] })
                 await verifiersPool.registerVerifier(amount, slots, { from: verifiers[i] })
@@ -87,19 +86,19 @@ contract('FitchainModel', (accounts) => {
                 assert.strictEqual(await gossipersPool.isRegisteredGossiper(gossipers[i]), true, 'Gossiper is not registered')
             }
         })
-        it('should data scientist make payment and send the payment receipt to provider', async() => {
+        it('should data scientist make payment and send the payment receipt to provider', async () => {
             await token.approve(payment.address, price, { from: dataScientist })
             const lockPayment = await payment.lockPayment(modelId, price, dataOwner, dataAssetId, wallTime, { from: dataScientist })
             assert.strictEqual(lockPayment.logs[0].args.Id, modelId, 'unable to lock payment')
             assert.strictEqual((2 * amount) - price, web3.utils.toDecimal(await token.balanceOf(dataScientist)), 'invalid transfer')
         })
-        it('should data owner call creat model and stake on it', async() => {
+        it('should data owner call creat model and stake on it', async () => {
             await token.approve(stake.address, minModelStake, { from: dataOwner })
             createdModel = await model.createModel(modelId, modelId, minKVerifiers, minKVerifiers, { from: dataOwner })
             assert.strictEqual(((2 * amount) - minModelStake), web3.utils.toDecimal(await token.balanceOf(dataOwner)))
-            assert.strictEqual(createdModel.logs[0].args.modelId, modelId, 'unable to init model');
+            assert.strictEqual(createdModel.logs[0].args.modelId, modelId, 'unable to init model')
         })
-        it('should elected gossipers listen and commit their votes', async() => {
+        it('should elected gossipers listen and commit their votes', async () => {
             // submit proof of training
             const merkleRoot = [utils.soliditySha3(['string'], ['trx1']), utils.soliditySha3(['string'], ['trx2']), utils.soliditySha3(['string'], ['trx3'])]
             const result = utils.soliditySha3(['string'], ['results'])
@@ -111,17 +110,17 @@ contract('FitchainModel', (accounts) => {
                 assert.strictEqual(proof.logs[0].args.proofId, await gossipersPool.getProofIdByChannelId(modelId), 'invalid proof Id')
             }
         })
-        it('should set model trained true if reach the total number of gossiper votes', async() => {
+        it('should set model trained true if reach the total number of gossiper votes', async () => {
             await gossipersPool.validateProof(modelId, { from: dataOwner })
             assert.strictEqual(await gossipersPool.isValidProof(modelId), true, 'invalid proof')
             await model.setModelTrained(modelId, { from: dataOwner })
             assert.strictEqual(await model.isModelTrained(modelId), true, 'Model is not trained')
         })
-        it('should data owner publish the trained model', async() => {
+        it('should data owner publish the trained model', async () => {
             const publishedModel = await model.publishModel(modelId, modelLocation, modelFormat, modelType, modelInputSignature, { from: dataOwner })
             assert.strictEqual(modelId, publishedModel.logs[0].args.modelId, 'unable to publish model')
         })
-        it('should start model verification challenge', async() => {
+        it('should start model verification challenge', async () => {
             const verificationChallenge = await model.verifyModel(modelId, verifiers.length, wallTime, testingDataId, { from: dataOwner })
             assert.strictEqual(verificationChallenge.logs[0].args.state, true, 'unable to trigger the verification game')
         })
@@ -148,15 +147,15 @@ contract('FitchainModel', (accounts) => {
                 assert.strictEqual(modelId, revealVote.logs[0].args.commitmentId, 'unable to call reveal vote')
             }
         })
-        it('should data owner able to set model verified if all verifiers commit their votes', async() => {
+        it('should data owner able to set model verified if all verifiers commit their votes', async () => {
             await model.setModelVerified(modelId, { from: dataOwner })
             assert.strictEqual(true, await model.isModelVerified(modelId), 'model is not verified')
         })
-        it('should data owner able to release model stake', async() => {
+        it('should data owner able to release model stake', async () => {
             const releasedModelStake = await model.releaseModelStake(modelId, { from: dataOwner })
-            assert.strictEqual(releasedModelStake.logs[0].args.modelId, modelId, 'unable to release stake');
+            assert.strictEqual(releasedModelStake.logs[0].args.modelId, modelId, 'unable to release stake')
         })
-        it('should data owner receive the locked payment', async() => {
+        it('should data owner receive the locked payment', async () => {
             const releasedPayment = await payment.releasePayment(modelId, { from: dataOwner })
             assert.strictEqual(releasedPayment.logs[0].args.Id, modelId, 'unable to release payment')
         })
