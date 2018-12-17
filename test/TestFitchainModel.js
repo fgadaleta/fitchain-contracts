@@ -14,7 +14,7 @@ const web3 = utils.getWeb3()
 
 contract('FitchainModel', (accounts) => {
     describe('Test Fitchain Model Integration', () => {
-        let token, i, registry, verifiersPool, gossipersPool, commitReveal, model
+        let token, i, registry, verifiersPool, gossipersPool, commitReveal, model, stake, payment, revealVote, signature
         // contracts configurations
         const minModelStake = 100
         const minKVerifiers = 3
@@ -58,8 +58,6 @@ contract('FitchainModel', (accounts) => {
             gossipersPool = await GossipersPool.new(registry.address, minKGossipers, maxKGossipers, minStake)
             model = await Model.new(minModelStake, gossipersPool.address, verifiersPool.address, stake.address)
             payment = await Payment.new(model.address, minWallTime, token.address)
-            totalSupply = await token.totalSupply()
-            genesisBalance = web3.utils.toDecimal(await token.balanceOf(genesisAccount))
             // transfer tokens to verifiers, gossipers, data owner, data scientist
             for (i = 0; i < verifiers.length; i++) {
                 await token.transfer(verifiers[i], (slots * amount) + 1, { from: genesisAccount })
