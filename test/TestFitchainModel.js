@@ -39,6 +39,11 @@ contract('FitchainModel', (accounts) => {
         let createdModel
         let eot = 'THIS IS FAKE END OF TRAINING!'
         let proof
+        let modelLocation = 'QmWVZ87MXAwt5wvgsM9akHUnGE5K3SRSKMmkQtPXRsrPUk' // ipfs hash
+        let modelFormat = 0 // csv file
+        let modelType = 'collection'
+        let modelInputSignature ='hgGDH7843hjds'
+        let testingDataId = utils.soliditySha3(['string'], ['testing data for verification game'])
 
         before(async () => {
             token = await FitchainToken.new()
@@ -108,6 +113,21 @@ contract('FitchainModel', (accounts) => {
             assert.strictEqual(await gossipersPool.isValidProof(modelId), true, 'invalid proof')
             await model.setModelTrained(modelId, { from: dataOwner })
             assert.strictEqual(await model.isModelTrained(modelId), true, 'Model is not trained')
+        })
+        it('should data owner publish the trained model', async() => {
+            const publishedModel = await model.publishModel(modelId, modelLocation, modelFormat, modelType, modelInputSignature, { from: dataOwner })
+            assert.strictEqual(modelId, publishedModel.logs[0].args.modelId, 'unable to publish model')
+        })
+        it('should start model verification challenge', async() => {
+            const verificationChallenge = await model.verifyModel(modelId, verifiers.length, wallTime, testingDataId, { from: dataOwner })
+            assert.strictEqual(verificationChallenge.logs[0].args.state, true, 'unable to trigger the verification game')
+        })
+        it('should start commit-reveal scheme', async () => {
+            let commitStarted
+            for (i = 0; i < verifiers.length; i++) {
+                commitStarted = await verifiersPool.startCommitRevealPhase(modelId, { from: verifiers[i] })
+            }
+            assert.strictEqual(commitStarted.logs[0].args.challengeId, modelId, 'unable to start commit-reveal phase')
         })
     })
 })

@@ -20,11 +20,11 @@ contract FitchainModel {
         uint256 kVerifiers;
         uint256 format;
         address owner;
-        bytes32 location;
+        string location;
         bytes32 paymentId;
         bytes32 gossipersPoolId;
         bytes32[] verifiersPoolIds;
-        bytes inputSignature;
+        string inputSignature;
         string modelType;
     }
 
@@ -38,7 +38,8 @@ contract FitchainModel {
     //events
     event ModelCreated(bytes32 modelId, address owner, bool state);
     event StakeReleased(bytes32 modelId, address to, uint256 amount);
-    event ModelPublished(bytes32 modelId, bytes32 location, uint256 format, string modelType, bytes inputSignature);
+    event ModelPublished(bytes32 modelId, string location, uint256 format, string modelType, string inputSignature);
+    event ModelVerificationStarted(bytes32 modelId, uint256 kVerifiers, bool state);
 
     modifier notExist(bytes32 modelId){
         require(!models[modelId].exist, 'Model already exist');
@@ -56,7 +57,8 @@ contract FitchainModel {
     }
 
     modifier onlyValidatedModel(bytes32 modelId){
-        require(models[modelId].location != bytes32(0), 'model not exists');
+        bytes memory tempLocationBytes = bytes(models[modelId].location);
+        require(tempLocationBytes.length != 0, 'model not exists');
         require(models[modelId].isTrained, 'Model is not trained yet!');
         require(gossipersPool.getChannelOwner(modelId) == address(this), 'invalid channel owner');
         _;
@@ -78,8 +80,9 @@ contract FitchainModel {
     }
 
     function createModel(bytes32 modelId, bytes32 paymentRecieptId, uint256 m, uint256 n) public notExist(modelId) returns(bool) {
+        // needs to verify consumer signature when create new model
         if(stake.stake(modelId, msg.sender, minStake)){
-            models[modelId] = Model(true, false, false, 0,n, 0, msg.sender, bytes32(0), paymentRecieptId, bytes32(0), new bytes32[](0), new bytes(0), new string(0));
+            models[modelId] = Model(true, false, false, 0,n, 0, msg.sender, new string(0), paymentRecieptId, bytes32(0), new bytes32[](0), new string(0), new string(0));
             // start goisspers channel
             gossipersPool.initChannel(modelId, n, m, address(this));
             emit ModelCreated(modelId, msg.sender, true);
@@ -90,7 +93,7 @@ contract FitchainModel {
 
     }
 
-    function publishModel(bytes32 modelId, bytes32 _location, uint256 _format, string _modelType, bytes _inputSignature) public onlyModelOwner(modelId) returns(bool) {
+    function publishModel(bytes32 modelId, string _location, uint256 _format, string _modelType, string _inputSignature) public onlyModelOwner(modelId) returns(bool) {
         models[modelId].location = _location;
         models[modelId].format = _format;
         models[modelId].modelType = _modelType;
@@ -99,10 +102,12 @@ contract FitchainModel {
         return true;
     }
 
-    function verifyModel(bytes32 modelId, bytes32 challengId, uint256 kVerifiers, uint256 wallTime, bytes32 testingData) public onlyValidatedModel(modelId) onlyModelOwner(modelId) returns(bool){
+    function verifyModel(bytes32 modelId, uint256 kVerifiers, uint256 wallTime, bytes32 testingData) public onlyValidatedModel(modelId) onlyModelOwner(modelId) returns(bool){
         models[modelId].kVerifiers = kVerifiers;
         //init verification pool
-        verifiersPool.initChallenge(modelId, challengId, wallTime, kVerifiers, testingData);
+        require(verifiersPool.initChallenge(modelId, modelId, wallTime, kVerifiers, testingData), 'unable to initialize challenge');
+        emit ModelVerificationStarted(modelId, kVerifiers, true);
+        return true;
     }
 
     function releaseModelStake(bytes32 modelId) public onlyVerifiedModel(modelId) returns(bool) {
