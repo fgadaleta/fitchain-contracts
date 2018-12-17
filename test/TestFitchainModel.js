@@ -44,6 +44,9 @@ contract('FitchainModel', (accounts) => {
         let modelType = 'collection'
         let modelInputSignature ='hgGDH7843hjds'
         let testingDataId = utils.soliditySha3(['string'], ['testing data for verification game'])
+        // model verification challenge
+        let trainedModelResult = '{MSE: 0.002, accuracy: 0.9}'
+        let trainedModelhash = utils.soliditySha3(['bool', 'string'], [true, trainedModelResult])
 
         before(async () => {
             token = await FitchainToken.new()
@@ -128,6 +131,34 @@ contract('FitchainModel', (accounts) => {
                 commitStarted = await verifiersPool.startCommitRevealPhase(modelId, { from: verifiers[i] })
             }
             assert.strictEqual(commitStarted.logs[0].args.challengeId, modelId, 'unable to start commit-reveal phase')
+        })
+        it('should verifiers commit the same vote', async () => {
+            let committedVote
+            for (i = 0; i < verifiers.length; i++) {
+                committedVote = await commitReveal.commit(modelId, trainedModelhash, { from: verifiers[i] })
+                assert.strictEqual(committedVote.logs[0].args.voter, verifiers[i], 'unable to commit vote')
+            }
+        })
+        it('should verifiers reveal pre-image after commit timeout', async () => {
+            await utils.sleep(30000)
+            const canReveal = await commitReveal.canReveal(modelId)
+            assert.strictEqual(canReveal, true, 'can not reveal')
+            for (i = 0; i < verifiers.length; i++) {
+                revealVote = await commitReveal.reveal(modelId, trainedModelResult, true, { from: verifiers[i] })
+                assert.strictEqual(modelId, revealVote.logs[0].args.commitmentId, 'unable to call reveal vote')
+            }
+        })
+        it('should data owner able to set model verified if all verifiers commit their votes', async() => {
+            await model.setModelVerified(modelId, { from: dataOwner })
+            assert.strictEqual(true, await model.isModelVerified(modelId), 'model is not verified')
+        })
+        it('should data owner able to release model stake', async() => {
+            const releasedModelStake = await model.releaseModelStake(modelId, { from: dataOwner })
+            assert.strictEqual(releasedModelStake.logs[0].args.modelId, modelId, 'unable to release stake');
+        })
+        it('should data owner receive the locked payment', async() => {
+            const releasedPayment = await payment.releasePayment(modelId, { from: dataOwner })
+            assert.strictEqual(releasedPayment.logs[0].args.Id, modelId, 'unable to release payment')
         })
     })
 })
