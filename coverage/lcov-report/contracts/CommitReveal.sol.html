@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/CommitReveal.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> CommitReveal.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">80.7% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>46/57</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">54.76% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>23/42</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">92.31% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>12/13</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">80.33% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>49/61</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28×</span>
+<span class="cline-any cline-yes">28×</span>
+<span class="cline-any cline-yes">84×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28×</span>
+<span class="cline-any cline-yes">28×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.25;
+&nbsp;
+/**
+@title Fitchain Commit Reveal Scheme
+@author Team: Fitchain Team
+*/
+&nbsp;
+contract CommitReveal {
+&nbsp;
+    struct Commitment{
+        bool exist;
+        bool isRevealed;
+        bool vote;
+        bytes32 hash;
+        string value;
+    }
+&nbsp;
+    struct Setting{
+        bool exist;
+        uint256 commitTimeout;
+        uint256 revealTimeout;
+        address owner;
+        address[] voters;
+    }
+&nbsp;
+    struct Result{
+        bool state;
+        address[] losers;
+    }
+&nbsp;
+    mapping(bytes32 =&gt; mapping(address =&gt; Commitment)) commitments;
+    mapping(bytes32 =&gt; Setting) settings;
+    mapping(bytes32 =&gt; uint256) commitmentsCount;
+    mapping(bytes32 =&gt; Result) results;
+&nbsp;
+    // events
+    event CommitmentInitialized(bytes32 commitmentId, uint256 commitTime, uint256 revealingTime, address[] voters);
+    event CommitmentCommitted(bytes32 commitmentId, address voter);
+    event CommitmentTimedout(bytes32 commitmentId);
+    event CommitmentRevealed(bytes32 commitmentId, address voter, uint256 revealingTime);
+    event CommitmentResult(address[] losers, int8 state);
+    // modifiers
+    modifier onlyAfterReveal(bytes32 commitmentId){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(settings[commitmentId].revealTimeout &lt;= block.timestamp, 'commitment not revealed yet');
+        _;
+    }
+&nbsp;
+    modifier onlyCommitmentVoters(bytes32 commitmentId) {
+        bool exists = false;
+        for(uint256 i=0; i &lt; settings[commitmentId].voters.length; i++){
+            if(settings[commitmentId].voters[i] == msg.sender) exists = true;
+        }
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(exists, 'invalid voter address');
+        _;
+    }
+&nbsp;
+    modifier onlyCommitmentOwner(bytes32 commitmentId){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(settings[commitmentId].owner == msg.sender, 'invalid commitment owner');
+        _;
+    }
+&nbsp;
+    modifier onlyCommitmentNotExist(bytes32 commitmentId){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(!settings[commitmentId].exist, 'Commitment already exists');
+        _;
+    }
+&nbsp;
+    function setup(bytes32 _commitmentId, uint256 _commitTimeout, uint256 _revealTimeout, address[] _voters) public onlyCommitmentNotExist(_commitmentId) returns(bool){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_commitTimeout &gt;= 20 &amp;&amp; _revealTimeout &gt;= 20, 'Indicating invalid commit timeouts');
+        settings[_commitmentId] = Setting(true, _commitTimeout + block.timestamp, _commitTimeout + _revealTimeout + block.timestamp, msg.sender, _voters);
+        commitmentsCount[_commitmentId] = 0;
+        emit CommitmentInitialized(_commitmentId, _commitTimeout + block.timestamp,  _commitTimeout + _revealTimeout + block.timestamp, _voters);
+        return true;
+    }
+&nbsp;
+    function commit(bytes32 _commitmentId, bytes32 _hash) public onlyCommitmentVoters(_commitmentId) returns(bool){
+        require(!commitments[_commitmentId][msg.sender].exist, 'avoid replay attack');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(settings[_commitmentId].commitTimeout &gt; block.timestamp, 'Invalid commit time');
+        commitments[_commitmentId][msg.sender] = Commitment(true, false, false,_hash, new string(0));
+        emit CommitmentCommitted(_commitmentId, msg.sender);
+        return true;
+    }
+&nbsp;
+    function reveal(bytes32 _commitmentId, string _value, bool _vote) public onlyCommitmentVoters(_commitmentId) returns(bool){
+        <span class="missing-if-branch" title="else path not taken" >E</span>if(settings[_commitmentId].revealTimeout &gt;= block.timestamp) emit CommitmentTimedout(_commitmentId);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(commitments[_commitmentId][msg.sender].exist, 'Commitment does not exist!');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(!commitments[_commitmentId][msg.sender].isRevealed, 'Indicating replay attack');
+        require(settings[_commitmentId].revealTimeout &gt; block.timestamp &amp;&amp; settings[_commitmentId].commitTimeout &lt; block.timestamp, 'invalid reveal timing!');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(commitments[_commitmentId][msg.sender].hash == keccak256(abi.encodePacked(_vote, _value)), 'invalid commitment preimage');
+        commitments[_commitmentId][msg.sender].vote = _vote;
+        commitments[_commitmentId][msg.sender].value = _value;
+        commitments[_commitmentId][msg.sender].isRevealed = true;
+        emit CommitmentRevealed(_commitmentId, msg.sender, settings[_commitmentId].revealTimeout);
+        return true;
+    }
+&nbsp;
+    function getCommitmentResult(bytes32 _commitmentId, address[] verifiers) public onlyCommitmentOwner(_commitmentId) onlyAfterReveal(_commitmentId) returns(address[], int8){
+        uint256 votingUp = 0;
+        uint256 votingDown = 0;
+        for(uint256 i=0; i &lt; verifiers.length; i++){
+            // (inconsistent commitment)
+            <span class="missing-if-branch" title="if path not taken" >I</span>if(commitments[_commitmentId][verifiers[i]].hash != keccak256(abi.encodePacked(commitments[_commitmentId][verifiers[i]].vote, commitments[_commitmentId][verifiers[i]].value)))
+            results[_commitmentId].losers.push(verifiers[i]);
+            else{
+                if(verifiers.length &gt;=2 &amp;&amp; i &lt; verifiers.length-1){
+                    <span class="missing-if-branch" title="else path not taken" >E</span>if(commitments[_commitmentId][verifiers[i]].vote == commitments[_commitmentId][verifiers[i+1]].vote &amp;&amp;
+                    commitments[_commitmentId][verifiers[i]].hash == commitments[_commitmentId][verifiers[i+1]].hash){
+                        <span class="missing-if-branch" title="else path not taken" >E</span>if(commitments[_commitmentId][verifiers[i]].vote){
+                            votingUp +=2;
+                            i++;
+                        }else{
+<span class="cstat-no" title="statement not covered" >                            votingDown +=2</span>;
+                            i++;
+                        }
+                    }else{
+<span class="cstat-no" title="statement not covered" >                        if(commitments[_commitmentId][verifiers[i]].vote){</span>
+<span class="cstat-no" title="statement not covered" >                            votingUp +=1</span>;
+                        }else{
+<span class="cstat-no" title="statement not covered" >                            votingDown +=1</span>;
+                        }
+                    }
+                }
+            }
+        }
+        <span class="missing-if-branch" title="else path not taken" >E</span>if(votingUp &gt; votingDown) {
+            emit CommitmentResult(results[_commitmentId].losers, 1);
+            results[_commitmentId].state = true;
+            // slash losers
+            return (results[_commitmentId].losers, 1);
+        }
+<span class="cstat-no" title="statement not covered" >        results[_commitmentId].state = false</span>;
+        // slash data provider and losers (2nd item in the tuple winners)
+<span class="cstat-no" title="statement not covered" >        emit CommitmentResult(results[_commitmentId].losers, 0);</span>
+<span class="cstat-no" title="statement not covered" >        return (results[_commitmentId].losers, 0);</span>
+    }
+&nbsp;
+    function isCommitmentTimedout(bytes32 _commitmentId) public view returns(bool){
+        <span class="missing-if-branch" title="else path not taken" >E</span>if(settings[_commitmentId].revealTimeout &lt;= block.timestamp){
+            return true;
+        }
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+    }
+&nbsp;
+    function getRevealTimeout(bytes32 _commitmentId) public view returns(uint256) {
+        return settings[_commitmentId].revealTimeout;
+    }
+&nbsp;
+    function getCommitTimeout(bytes32 _commitmentId) public view returns(uint256) {
+        return settings[_commitmentId].commitTimeout;
+    }
+&nbsp;
+    function canReveal(bytes32 _commitmentId) public view returns(bool) {
+        return (settings[_commitmentId].commitTimeout &lt;= block.timestamp);
+    }
+<span class="fstat-no" title="function not covered" >    function getCommitRevealResult(bytes32 _commitmentId) public view returns(address[], int8</span>) {
+<span class="cstat-no" title="statement not covered" >        if(results[_commitmentId].state) <span class="cstat-no" title="statement not covered" >return (results[_commitmentId].losers, 1);</span></span>
+<span class="cstat-no" title="statement not covered" >        return (results[_commitmentId].losers, 0);</span>
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 18 2018 14:26:31 GMT+0100 (CET)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

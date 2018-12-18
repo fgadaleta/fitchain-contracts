@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/GossipersPool.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> GossipersPool.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">86.36% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>57/66</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">55% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>22/40</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">87.5% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>21/24</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">90.54% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>67/74</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.25;
+&nbsp;
+import 'openzeppelin-solidity/contracts/cryptography/ECDSA.sol';
+import './FitchainRegistry.sol';
+&nbsp;
+/**
+@title Fitchain Gossipers Pool Contract
+@author Team: Fitchain Team
+*/
+&nbsp;
+contract GossipersPool {
+&nbsp;
+    // lighting channels
+    struct Channel {
+        bool state;
+        address owner;
+        bytes32 proof;
+        address[] gossipers;
+    }
+&nbsp;
+    // proof of training
+    struct Proof {
+        bool isVerified;
+        uint256 MofNSigs;
+        bytes32 channelId;
+        bytes32[] results;
+        bytes32[] proofHashs;
+        bytes[] signatures;
+    }
+&nbsp;
+    // contract settings (only VPC contract owner)
+    struct GPCsettings {
+        uint256  minKGossipers;
+        uint256  maxKGossipers;
+        uint256  minStake;
+    }
+&nbsp;
+    mapping(bytes32 =&gt; Channel) channels;
+    mapping(bytes32 =&gt; Proof) proofs;
+    mapping(address =&gt; GPCsettings) settings;
+    FitchainRegistry private registry;
+&nbsp;
+&nbsp;
+&nbsp;
+    // events
+    event ChannelInitialized(bytes32 channelId, address[] gossipers, bytes32 proofId);
+    event PoTSubmitted(bytes32 channelId, bytes32 proofId, address verifier, bytes32 proofHash);
+    event PoTValidated(bytes32 channelId, bytes32 proofId, bool state, uint256 submittedProofs);
+&nbsp;
+    // access control modifiers
+    modifier requireKGossipers(uint256 KGossipers, uint256 mOfN) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(settings[address(this)].minKGossipers &lt;= KGossipers, 'indicating small number of gossipers');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(settings[address(this)].maxKGossipers &gt;= KGossipers, 'indicating large number of gossipers');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(getAvailableGossipers().length &gt;= KGossipers, 'K gossipers are not available');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(KGossipers &gt;= mOfN, 'Invalid channel initialization input parameters');
+        _;
+    }
+&nbsp;
+    modifier isValidChannelId(bytes32 channelId) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(!channels[channelId].state, 'Channel already exists');
+        _;
+    }
+&nbsp;
+    modifier onlyValidStake(uint256 amount){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(amount &gt;= settings[address(this)].minStake);
+        _;
+    }
+&nbsp;
+    modifier canVerify(bytes32 channelId) {
+        bool state = false;
+        for(uint256 i=0; i&lt; channels[channelId].gossipers.length; i++){
+            if(msg.sender == channels[channelId].gossipers[i]) state=true;
+        }
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(state, 'unable to verify the proof, access denied!');
+        _;
+    }
+&nbsp;
+    modifier isPotValidated(bytes32 channelId) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(proofs[channels[channelId].proof].isVerified, 'Unable to terminate channel, PoT not validated yet!');
+        _;
+    }
+&nbsp;
+    // init GPC settings
+    constructor(address _registryAddress, uint256 _minKGossipers, uint256 _maxKGossipers, uint256 _minStake) public {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_registryAddress != address(0), 'invalid registry contract address');
+        settings[address(this)] = GPCsettings(_minKGossipers, _maxKGossipers, _minStake);
+        registry = FitchainRegistry(_registryAddress);
+    }
+&nbsp;
+    function registerGossiper(uint256 amount, uint256 slots) public onlyValidStake(amount) returns(bool){
+        return registry.register(msg.sender, slots, keccak256(abi.encodePacked(address(this))), amount);
+    }
+&nbsp;
+    function isRegisteredGossiper(address gossiper) public view returns(bool){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(gossiper != address(0), 'invalid gossiper address');
+        return registry.isActorRegistered(gossiper);
+    }
+&nbsp;
+    function deregisterGossiper() public returns(bool){
+        return registry.deregister(msg.sender,  keccak256(abi.encodePacked(address(this))));
+    }
+&nbsp;
+    function getAvailableGossipers() public view returns(address[]){
+        return registry.getAvaliableRegistrants();
+    }
+&nbsp;
+    function getKGossipers(bytes32 channelId, uint256 K) private returns(uint256){
+        address[] memory gossipersSet = getAvailableGossipers();
+        for(uint256 i=0; i&lt; K; i++){
+            channels[channelId].gossipers.push(gossipersSet[i]);
+        }
+        return channels[channelId].gossipers.length;
+    }
+&nbsp;
+&nbsp;
+    function initChannel(bytes32 channelId, uint256 KGossipers, uint256 mOfN, address owner) public requireKGossipers(KGossipers, mOfN) isValidChannelId(channelId) returns(bool) {
+        bytes32 proofId = keccak256(abi.encodePacked(channelId, block.number, msg.sender));
+        proofs[proofId] = Proof(false, mOfN, channelId, new bytes32[](0), new bytes32[](0), new bytes[](0));
+        channels[channelId] = Channel(true, owner, proofId,new address[](0));
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(getKGossipers(channelId, KGossipers) == KGossipers , 'Unable to initialize channel');
+        for (uint256 i=0; i&lt;channels[channelId].gossipers.length; i++){
+            registry.decrementActorSlots(channels[channelId].gossipers[i]);
+        }
+        emit ChannelInitialized(channelId, channels[channelId].gossipers, proofId);
+        return true;
+    }
+&nbsp;
+    function terminateChannel(bytes32 channelId) public isPotValidated(channelId) returns(bool) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if(!channels[channelId].state) <span class="cstat-no" title="statement not covered" >return true;</span>
+        channels[channelId].state = false;
+        return true;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getChannelGossipers(bytes32 channelId) public view returns(address[]</span>) {
+<span class="cstat-no" title="statement not covered" >        return channels[channelId].gossipers;</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getChannelByProofId(bytes32 proofId) public view returns(bytes32</span>) {
+<span class="cstat-no" title="statement not covered" >        return proofs[proofId].channelId;</span>
+    }
+&nbsp;
+    function getProofIdByChannelId(bytes32 channelId) public view returns(bytes32) {
+        return channels[channelId].proof;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getProof(bytes32 channelId) public view returns(bool, bytes32, bytes32[]</span>) {
+<span class="cstat-no" title="statement not covered" >        bytes32 proofId = channels[channelId].proof</span>;
+<span class="cstat-no" title="statement not covered" >        return (proofs[proofId].isVerified, proofs[proofId].channelId, proofs[proofId].proofHashs);</span>
+    }
+&nbsp;
+    function isValidProof(bytes32 channelId) public view returns(bool) {
+        return proofs[channels[channelId].proof].isVerified;
+    }
+&nbsp;
+    function isValidSignature(bytes32 hash, bytes signature, address gossiper) private pure returns (bool){
+        return (gossiper == ECDSA.recover(hash, signature));
+    }
+&nbsp;
+    function submitProof(bytes32 channelId, string eot, bytes32[] merkleroot, bytes signature, bytes32 result) public canVerify(channelId) returns(bool) {
+        bytes32 prefixedHash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(channelId, merkleroot, eot, result)));
+        <span class="missing-if-branch" title="else path not taken" >E</span>if(isValidSignature(prefixedHash, signature, msg.sender)){
+            proofs[channels[channelId].proof].signatures.push(signature);
+            proofs[channels[channelId].proof].proofHashs.push(prefixedHash);
+            proofs[channels[channelId].proof].results.push(result);
+            emit PoTSubmitted(channelId, channels[channelId].proof, msg.sender, prefixedHash);
+            return true;
+        }
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+    }
+&nbsp;
+    function freeChannelSlots(bytes32 channelId) private returns(bool){
+        for (uint j=0; j &lt; channels[channelId].gossipers.length; j++){
+            registry.incrementActorSlots(channels[channelId].gossipers[j]);
+            //TODO: free the gossiper stake
+        }
+        return true;
+    }
+    function validateProof(bytes32 channelId) public returns (bool){
+        uint256 kValidProofs = 0;
+        for(uint256 i=0; i&lt;proofs[channels[channelId].proof].signatures.length; i++){
+            if(i &lt; proofs[channels[channelId].proof].signatures.length -1){
+                <span class="missing-if-branch" title="else path not taken" >E</span>if(proofs[channels[channelId].proof].proofHashs[i] == proofs[channels[channelId].proof].proofHashs[i+1]) {
+                    kValidProofs +=1;
+                }
+            }else{
+                <span class="missing-if-branch" title="else path not taken" >E</span>if(proofs[channels[channelId].proof].proofHashs[i] == proofs[channels[channelId].proof].proofHashs[i-1]){
+                    kValidProofs +=1;
+                }
+            }
+        }
+        <span class="missing-if-branch" title="else path not taken" >E</span>if(proofs[channels[channelId].proof].MofNSigs &lt;= kValidProofs) {
+            proofs[channels[channelId].proof].isVerified = true;
+            // free gossipers
+            <span class="missing-if-branch" title="else path not taken" >E</span>require(freeChannelSlots(channelId), 'unable to free channel');
+            emit PoTValidated(channelId, channels[channelId].proof, true, kValidProofs);
+            return true;
+        }
+<span class="cstat-no" title="statement not covered" >        emit PoTValidated(channelId, channels[channelId].proof, false, kValidProofs);</span>
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+    }
+&nbsp;
+    function getChannelOwner(bytes32 channelId) public view returns(address) {
+        return channels[channelId].owner;
+    }
+&nbsp;
+    function isChannelTerminated(bytes32 channelId) public view returns (bool) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (channels[channelId].state) <span class="cstat-no" title="statement not covered" >return false;</span>
+        return true;
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 18 2018 14:26:31 GMT+0100 (CET)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

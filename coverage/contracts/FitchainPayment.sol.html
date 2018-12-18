@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/FitchainPayment.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> FitchainPayment.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">83.33% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>15/18</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">43.75% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>7/16</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">80% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>4/5</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">80.95% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>17/21</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.25;
+&nbsp;
+import './FitchainToken.sol';
+import './FitchainModel.sol';
+&nbsp;
+/**
+@title Fitchain Payment Contract
+@author Team: Fitchain Team
+*/
+&nbsp;
+contract FitchainPayment {
+&nbsp;
+    struct Payment{
+        bool exists;
+        uint256 amount;
+        uint256 timeout;
+        address sender;
+        address reciever;
+        bytes32 asset;
+    }
+&nbsp;
+    FitchainModel private model;
+    FitchainToken private token;
+&nbsp;
+    uint256 private MIN_TIMEOUT;
+    // ModelId == PaymentId --&gt; payment
+    mapping(bytes32 =&gt; Payment) payments;
+&nbsp;
+    modifier onlyValidModel(bytes32 modelId){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(model.isModelTrained(modelId) &amp;&amp; model.isModelVerified(modelId), 'invalid model state');
+        _;
+    }
+&nbsp;
+    // events
+    event PaymentLocked(bytes32 Id, address sender, address reciever, uint256 amount, bytes32 asset);
+    event PaymentReleased(bytes32 Id, address reciever, uint256 amount);
+    event PaymentRefunded(bytes32 Id, address reciever, uint256 amount);
+&nbsp;
+    constructor(address _modelContractAddress, uint256 _minTimeout, address _tokenAddress) public{
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_modelContractAddress != address(0), 'invalid contract address');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_tokenAddress != address(0), 'invalid token address');
+        model = FitchainModel(_modelContractAddress);
+        token = FitchainToken(_tokenAddress);
+        MIN_TIMEOUT = _minTimeout;
+    }
+&nbsp;
+    function lockPayment(bytes32 paymentId, uint256 amount, address reciever, bytes32 asset, uint256 timeout) public returns(bool){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(!payments[paymentId].exists, 'payment already exists');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(amount &gt; 0, 'invalid payment amount');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(timeout &gt;= MIN_TIMEOUT, 'invalid');
+        payments[paymentId] = Payment(true, amount, timeout, msg.sender, reciever, asset);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(token.transferFrom(msg.sender, address(this), amount));
+        emit PaymentLocked(paymentId, msg.sender, reciever, amount, asset);
+        return true;
+    }
+&nbsp;
+    function releasePayment(bytes32 paymentId) public onlyValidModel(paymentId) returns(bool){
+        token.transfer(payments[paymentId].reciever, payments[paymentId].amount);
+        emit PaymentReleased(paymentId,  payments[paymentId].reciever, payments[paymentId].amount);
+        return true;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function refundPayment(bytes32 paymentId) public returns(boo</span>l){
+        // not secure block timestamp
+<span class="cstat-no" title="statement not covered" >        require(payments[paymentId].timeout &gt;= block.timestamp, 'invalid timeout!')</span>;
+        token.transfer(payments[paymentId].sender, payments[paymentId].amount);
+<span class="cstat-no" title="statement not covered" >        emit PaymentRefunded(paymentId, payments[paymentId].sender, payments[paymentId].amount);</span>
+<span class="cstat-no" title="statement not covered" >        return true;</span>
+&nbsp;
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 18 2018 14:26:31 GMT+0100 (CET)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
