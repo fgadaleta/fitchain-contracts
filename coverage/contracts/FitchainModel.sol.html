@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/FitchainModel.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> FitchainModel.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">75.51% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>37/49</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">38.24% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>13/34</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">82.35% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>14/17</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">76.27% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>45/59</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.25;
+&nbsp;
+import './FitchainStake.sol';
+import './GossipersPool.sol';
+import './VerifiersPool.sol';
+&nbsp;
+/**
+@title Fitchain Model Contract
+@author Team: Fitchain Team
+*/
+&nbsp;
+contract FitchainModel {
+&nbsp;
+    // fitchain model
+    struct Model {
+        bool exist;
+        bool isTrained;
+        bool isVerified;
+        uint256 kGossipers;
+        uint256 kVerifiers;
+        uint256 format;
+        address owner;
+        string location;
+        bytes32 paymentId;
+        bytes32 gossipersPoolId;
+        bytes32[] verifiersPoolIds;
+        string inputSignature;
+        string modelType;
+    }
+&nbsp;
+    mapping(bytes32 =&gt; Model) models;
+    uint256 private minStake;
+    GossipersPool private gossipersPool;
+    VerifiersPool private verifiersPool;
+    FitchainStake private stake;
+&nbsp;
+&nbsp;
+    //events
+    event ModelCreated(bytes32 modelId, address owner, bool state);
+    event StakeReleased(bytes32 modelId, address to, uint256 amount);
+    event ModelPublished(bytes32 modelId, string location, uint256 format, string modelType, string inputSignature);
+    event ModelVerificationStarted(bytes32 modelId, uint256 kVerifiers, bool state);
+&nbsp;
+    modifier notExist(bytes32 modelId){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(!models[modelId].exist, 'Model already exist');
+        _;
+    }
+&nbsp;
+    modifier onlyExist(bytes32 modelId) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(models[modelId].exist,'Model does not exist!');
+        _;
+    }
+&nbsp;
+    modifier onlyModelOwner(bytes32 modelId){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(models[modelId].owner == msg.sender, 'invalid model owner');
+        _;
+    }
+&nbsp;
+    modifier onlyValidatedModel(bytes32 modelId){
+        bytes memory tempLocationBytes = bytes(models[modelId].location);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(tempLocationBytes.length != 0, 'model not exists');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(models[modelId].isTrained, 'Model is not trained yet!');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(gossipersPool.getChannelOwner(modelId) == address(this), 'invalid channel owner');
+        _;
+    }
+&nbsp;
+    modifier onlyVerifiedModel(bytes32 modelId){
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(models[modelId].isVerified, 'Model is not verified yet!');
+        _;
+    }
+&nbsp;
+    constructor(uint256 _minStake, address _gossiperContractAddress, address _verifierContractAddress, address _stakingAddress) public {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_gossiperContractAddress != address(0), 'invalid gossiper contract address');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_verifierContractAddress != address(0), 'invalid verifier contract address');
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_stakingAddress != address(0), 'invalid staking contract address');
+        gossipersPool = GossipersPool(_gossiperContractAddress);
+        verifiersPool = VerifiersPool(_verifierContractAddress);
+        stake = FitchainStake(_stakingAddress);
+        minStake = _minStake;
+    }
+&nbsp;
+    function createModel(bytes32 modelId, bytes32 paymentRecieptId, uint256 m, uint256 n) public notExist(modelId) returns(bool) {
+        // needs to verify consumer signature when create new model
+        <span class="missing-if-branch" title="else path not taken" >E</span>if(stake.stake(modelId, msg.sender, minStake)){
+            models[modelId] = Model(true, false, false, 0,n, 0, msg.sender, new string(0), paymentRecieptId, bytes32(0), new bytes32[](0), new string(0), new string(0));
+            // start goisspers channel
+            gossipersPool.initChannel(modelId, n, m, address(this));
+            emit ModelCreated(modelId, msg.sender, true);
+            return true;
+        }
+<span class="cstat-no" title="statement not covered" >        emit ModelCreated(modelId, msg.sender, false);</span>
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+&nbsp;
+    }
+&nbsp;
+    function publishModel(bytes32 modelId, string _location, uint256 _format, string _modelType, string _inputSignature) public onlyModelOwner(modelId) returns(bool) {
+        models[modelId].location = _location;
+        models[modelId].format = _format;
+        models[modelId].modelType = _modelType;
+        models[modelId].inputSignature = _inputSignature;
+        emit ModelPublished(modelId, _location, _format, _modelType, _inputSignature);
+        return true;
+    }
+&nbsp;
+    function verifyModel(bytes32 modelId, uint256 kVerifiers, uint256 wallTime, bytes32 testingData) public onlyValidatedModel(modelId) onlyModelOwner(modelId) returns(bool){
+        models[modelId].kVerifiers = kVerifiers;
+        //init verification pool
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(verifiersPool.initChallenge(modelId, modelId, wallTime, kVerifiers, testingData), 'unable to initialize challenge');
+        emit ModelVerificationStarted(modelId, kVerifiers, true);
+        return true;
+    }
+&nbsp;
+    function releaseModelStake(bytes32 modelId) public onlyVerifiedModel(modelId) returns(bool) {
+        stake.release(modelId, models[modelId].owner, minStake);
+        emit StakeReleased(modelId, models[modelId].owner, minStake);
+        return true;
+    }
+&nbsp;
+    function isModelTrained(bytes32 modelId) public view onlyExist(modelId) returns(bool){
+        return models[modelId].isTrained;
+    }
+&nbsp;
+    function isModelVerified(bytes32 modelId) public view onlyExist(modelId) returns(bool){
+        return models[modelId].isVerified;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getModelKVerifiersCount(bytes32 modelId) public view onlyExist(modelId) returns(uint25</span>6){
+<span class="cstat-no" title="statement not covered" >        return models[modelId].kVerifiers;</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getModelKGossipersCount(bytes32 modelId) public view onlyExist(modelId) returns(uint25</span>6){
+<span class="cstat-no" title="statement not covered" >        return models[modelId].kGossipers;</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getModelChallengeCount(bytes32 modelId) public view onlyExist(modelId) returns(uint25</span>6){
+<span class="cstat-no" title="statement not covered" >        return models[modelId].verifiersPoolIds.length;</span>
+    }
+&nbsp;
+    function setModelTrained(bytes32 modelId) public onlyModelOwner(modelId) returns(bool) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(gossipersPool.isValidProof(modelId), 'Proof is not valid');
+        gossipersPool.terminateChannel(modelId);
+        models[modelId].isTrained = true;
+    }
+&nbsp;
+    function setModelVerified(bytes32 modelId) public onlyValidatedModel(modelId) {
+        for (uint256 i=0; i &lt; models[modelId].verifiersPoolIds.length; i++){
+<span class="cstat-no" title="statement not covered" >            (address[] memory losers, int8 state) = verifiersPool.getCommitRevealResults(models[modelId].verifiersPoolIds[i])</span>;
+            // need to slash or take actions based on the revealed commits
+<span class="cstat-no" title="statement not covered" >            if(state == -1){</span>
+<span class="cstat-no" title="statement not covered" >                models[modelId].isVerified = false</span>;
+                // emit event indicating commitment did NOT timedout!
+            }
+<span class="cstat-no" title="statement not covered" >            if(state == 0){</span>
+                // slash Data-compute provider
+                stake.slash(modelId, models[modelId].owner, minStake);
+<span class="cstat-no" title="statement not covered" >                for(uint256 j=0; j &lt; losers.length; j++){</span>
+                    //slash verifiers (losers only)
+                    verifiersPool.slashVerifier(models[modelId].verifiersPoolIds[i], losers[j]);
+                    //TODO: redistribute slashed amount as a reward
+                }
+            }
+<span class="cstat-no" title="statement not covered" >            require(verifiersPool.getChallengeOwner(models[modelId].verifiersPoolIds[i]) == address(this), 'invalid challenge owner')</span>;
+<span class="cstat-no" title="statement not covered" >            require(verifiersPool.isVerifiedProof(models[modelId].verifiersPoolIds[i]), 'invalid proof verification')</span>;
+        }
+        models[modelId].isVerified = true;
+    }
+&nbsp;
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 18 2018 14:26:31 GMT+0100 (CET)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
